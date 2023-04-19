@@ -1,0 +1,147 @@
+import { GroupByFarmListDoc, GroupListDoc, SoilDbName } from "./DbConst"
+import PouchDB from 'pouchdb-react-native';
+import { CreateFarmsInterface, CreateFarmsItems, CreateGroupInterface, CreateGroupItems } from "./Interfaces";
+import { EventEmitter } from 'events';
+
+export const initializeSoilDb = () => {
+  return new PouchDB(SoilDbName);
+}
+
+export const saveGroupData = async (db: any, newItem: CreateGroupItems) => {
+  // Try to retrieve the document by ID
+  return db.get(GroupListDoc).then(async (doc: any) => {
+    // Document found
+    console.log('Document found:');
+    if (doc.items) {
+      console.log('Document already exists');
+      const newId = doc.items.length + 1;
+      doc.items.push({
+        ...newItem,
+        group_id: newId,
+      });
+      // Save the modified document back to the database
+      return await db.put(doc);
+    }
+  }).catch(async (err: any) => {
+    console.log("Document doesn't exist, create it");
+    // Document doesn't exist, create it
+    if (err.status === 404) {
+      const newDoc: CreateGroupInterface = {
+        _id: GroupListDoc,
+        items: [{
+          ...newItem,
+          group_id: 1,
+        }],
+      };
+      return await db.put(newDoc);
+    } else {
+      console.log('Error checking if document exists:', err);
+    }
+  })
+}
+
+export const fetchAllGroupData = async (db: any) => {
+  const groupRes = await db.get(GroupListDoc);
+  if (groupRes?.items) {
+    return groupRes?.items as CreateGroupItems[];
+  }
+  return [] as CreateGroupItems[];
+}
+
+export const updateGroupData = async (db: any, newItem: CreateGroupItems, isSelectedGroup: CreateGroupItems) => {
+  // Get the document by its ID
+  const doc = await db.get(GroupListDoc);
+  // Find the index of the item you want to update
+  const itemIndex = doc.items.findIndex((item: CreateGroupItems) => item.group_id === isSelectedGroup.group_id);
+  // Update the item with the new data
+  doc.items[itemIndex] = {
+    ...isSelectedGroup,
+    ...newItem
+  }
+  // Save the updated document
+  return await db.put(doc);
+}
+
+export const deleteGroupData = async (db: any, isSelectedGroup: CreateGroupItems) => {
+  // Get the document by its ID
+  const doc = await db.get(GroupListDoc);
+  // Find the index of the item you want to update
+  const itemIndex = doc.items.findIndex((item: CreateGroupItems) => item.group_id === isSelectedGroup.group_id);
+  // If the item exists, remove it from the array and save the updated document
+  if (itemIndex >= 0) {
+    doc.items.splice(itemIndex, 1);
+    return await db.put(doc);
+  } else {
+    console.log(`Item with id 'item2' not found in document '${GroupListDoc}'.`);
+  }
+}
+
+export const saveFarmData = async (db: any, newItem: CreateFarmsItems) => {
+  // Try to retrieve the document by ID
+  return db.get(GroupByFarmListDoc).then(async (doc: any) => {
+    // Document found
+    console.log('Document found:');
+    if (doc.items) {
+      console.log('Document already exists');
+      const newId = doc.items.length + 1;
+      doc.items.push({
+        ...newItem,
+        farm_id: newId,
+      });
+      // Save the modified document back to the database
+      return await db.put(doc);
+    }
+  }).catch(async (err: any) => {
+    console.log("Document doesn't exist, create it");
+    // Document doesn't exist, create it
+    if (err.status === 404) {
+      const newDoc: CreateFarmsInterface = {
+        _id: GroupByFarmListDoc,
+        items: [{
+          ...newItem,
+          farm_id: 1,
+        }],
+      };
+      return await db.put(newDoc);
+    } else {
+      console.log('Error checking if document exists:', err);
+    }
+  })
+}
+
+export const updateFarmData = async (db: any, newItem: CreateFarmsItems, isSelectedFarmItem: CreateFarmsItems) => {
+  // Try to retrieve the document by ID
+  const doc = await db.get(GroupByFarmListDoc);
+  const itemIndex = doc.items.findIndex((item: CreateFarmsItems) => item.farm_id === isSelectedFarmItem.farm_id);
+  // Update the item with the new data
+  doc.items[itemIndex] = {
+    ...isSelectedFarmItem,
+    ...newItem
+  }
+  // Save the updated document
+  return await db.put(doc);
+}
+
+export const deleteFarmData = async (db: any, isSelectedGroup: CreateFarmsItems) => {
+  // Get the document by its ID
+  const doc = await db.get(GroupByFarmListDoc);
+  // Find the index of the item you want to update
+  const itemIndex = doc.items.findIndex((item: CreateFarmsItems) => item.farm_id === isSelectedGroup.farm_id);
+  // If the item exists, remove it from the array and save the updated document
+  if (itemIndex >= 0) {
+    doc.items.splice(itemIndex, 1);
+    return await db.put(doc);
+  } else {
+    console.log(`Item with id 'item2' not found in document '${GroupListDoc}'.`);
+  }
+}
+
+export const fetchAllGroupByFarmList = async (db: any, groupId: number) => {
+  const groupRes = await db.get(GroupByFarmListDoc);
+  if (groupRes?.items?.length) {
+    const filteredData = groupRes.items.filter((item: CreateFarmsItems) =>
+      item.group_id === groupId
+    );
+    return filteredData;
+  }
+}

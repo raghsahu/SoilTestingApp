@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "195309101158",
+    "project_id": "soil-testing-app",
+    "storage_bucket": "soil-testing-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:195309101158:android:33f021c19bceaf63140da7",
+        "android_client_info": {
+          "package_name": "com.soiltestingapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "195309101158-ll7mpkp4t0u4lct2447n7jg3tjdvu7ju.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.soiltestingapp",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "195309101158-1pt16cblla1bt0ih2079bfgca9nds354.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFss-2Sdg4p8MqzyF5tOBhq36SSNIUeGc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "195309101158-1pt16cblla1bt0ih2079bfgca9nds354.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
