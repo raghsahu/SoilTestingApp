@@ -6,6 +6,7 @@ import moment from "moment";
 export const countryCode= '+91';
 export const AsyncKey ={
   user: 'user',
+  device: 'device',
 }
 
 export const showToast = (message: string)=> {
@@ -25,6 +26,18 @@ export const getUserData = async () => {
     console.log('Error reading data', e);
   }
   return {} as UserInterface;
+};
+
+export const getDeviceData = async () => {
+  try {
+    const value = await AsyncStorage.getItem(AsyncKey.device);
+    if (value !== null) {
+      return JSON.parse(value);
+    }
+  } catch (e) {
+    console.log('Error reading data', e);
+  }
+  return {};
 };
 
 export const removeCountryCodeFromPhoneNumber=  (phoneNumber: string) => {
