@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 //ASSETS
 import { COLORS, IMAGES } from '../assets';
-import { Alert, BackHandler, StyleSheet, TouchableOpacity } from 'react-native';
+import { Alert, BackHandler, Platform, StyleSheet, TouchableOpacity } from 'react-native';
 import { VStack, Text, View, HStack, Image, ScrollView, } from 'native-base';
 import { Button, Statusbar, Header, GroupTabItem } from '../components';
 import { BarChart, LineChart } from 'react-native-gifted-charts';
@@ -10,11 +10,12 @@ import GroupByItemList from '../components/GroupByItemList';
 import AddNewGroupModal from '../components/AddNewGroupModal';
 import UpdateGroupModal from '../components/UpdateGroupModal';
 import AddNewFarmModal from '../components/AddNewFarmModal';
-import { getUserData, showToast } from '../utils/CommonUtils';
+import { GetAllPermissions, getUserData, showToast } from '../utils/CommonUtils';
 import { deleteFarmData, deleteGroupData, fetchAllGroupByFarmList, fetchAllGroupData, initializeSoilDb, saveFarmData, saveGroupData, updateFarmData, updateGroupData } from '../database/SoilAppDB';
 import { CreateFarmsItems, CreateGroupItems } from '../database/Interfaces';
 import { useFocusEffect } from '@react-navigation/native';
 import { UserInterface } from '../utils/Interfaces';
+import { UsbSerialManager } from '../usbSerialModule';
 
 const Home = (props: any) => {
     const db = initializeSoilDb();
@@ -376,8 +377,31 @@ const Home = (props: any) => {
                                                     isEditFarm: true,
                                                 })
                                             }}
-                                            onItemPlusClick={() => {
-                                                props.navigation.navigate('GroupItemDetails')
+                                            onItemPlusClick={async () => {
+                                                if(Platform.OS === 'android'){
+                                                    const devices = await UsbSerialManager.list();
+                                                    if(devices?.length){
+                                                        try {
+                                                            const deviceId= devices?.[0]?.deviceId;
+                                                            await UsbSerialManager.tryRequestPermission(deviceId);
+                                                            props.navigation.navigate('GroupItemDetails', {
+                                                                farmData: item,
+                                                            })
+                                                        } catch (err: any) {
+                                                            console.log('err',err);
+                                                          }
+                                                    }else{
+                                                     await GetAllPermissions()
+                                                     props.navigation.navigate('GroupItemDetails', {
+                                                        farmData: item,
+                                                    })
+                                                    }
+                                                }
+                                                else{
+                                                    props.navigation.navigate('GroupItemDetails', {
+                                                        farmData: item,
+                                                    })
+                                                }
                                             }}
                                             onDeleteClick={() => {
                                                 openConfirmationAlert(`Are You Sure You Want to delete ${item.farm_name} ?`, true)

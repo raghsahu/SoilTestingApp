@@ -1,6 +1,6 @@
-import { GroupByFarmListDoc, GroupListDoc, SoilDbName } from "./DbConst"
+import { GroupByFarmListDoc, GroupListDoc, ReportByFarm, SoilDbName } from "./DbConst"
 import PouchDB from 'pouchdb-react-native';
-import { CreateFarmsInterface, CreateFarmsItems, CreateGroupInterface, CreateGroupItems } from "./Interfaces";
+import { CreateFarmsInterface, CreateFarmsItems, CreateGroupInterface, CreateGroupItems, ReportByFarmInterface, ReportByFarmItems } from "./Interfaces";
 import { EventEmitter } from 'events';
 
 export const initializeSoilDb = () => {
@@ -143,5 +143,60 @@ export const fetchAllGroupByFarmList = async (db: any, groupId: number) => {
       item.group_id === groupId
     );
     return filteredData;
+  }
+}
+
+export const saveReportByFarm = async (db: any, newItem: ReportByFarmItems) => {
+  // Try to retrieve the document by ID
+  return db.get(ReportByFarm).then(async (doc: any) => {
+    // Document found
+    console.log('Document found:', doc);
+    if (doc.items) {
+      console.log('Document already exists');
+      const newId = doc.items.length + 1;
+      doc.items.push({
+        ...newItem,
+        report_id: newId,
+      });
+      // Save the modified document back to the database
+      return await db.put(doc);
+    }
+  }).catch(async (err: any) => {
+    console.log("Document doesn't exist, create it");
+    // Document doesn't exist, create it
+    if (err.status === 404) {
+      const newDoc: ReportByFarmInterface = {
+        _id: ReportByFarm,
+        items: [{
+          ...newItem,
+          report_id: 1,
+        }],
+      };
+      return await db.put(newDoc);
+    } else {
+      console.log('Error checking if document exists:', err);
+    }
+  })
+}
+
+export const fetchAllReportDataByFarm = async (db: any, groupId: number, farm_id: number, toDate: string, fromDate?: string) => {
+  const reportRes = await db.get(ReportByFarm);
+  if (reportRes?.items?.length) {
+    const filteredData = reportRes.items.filter((item: ReportByFarmItems) => {
+      const to_Date = new Date(toDate);
+      const from_Date = new Date(fromDate || (new Date()).toString());
+
+      if(item.group_id === groupId && 
+        item.farm_id === farm_id &&
+        new Date(item.create_time).getDate() === to_Date.getDate() 
+       // &&
+        //new Date(item.create_time) <= from_Date
+        ){
+        return item
+       }
+    }
+      
+    );
+    return filteredData || [] as ReportByFarmItems[];
   }
 }

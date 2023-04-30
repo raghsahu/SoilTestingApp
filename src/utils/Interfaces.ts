@@ -87,3 +87,14 @@ export interface UserInterface {
     photoURL?: string,
     dob?: string,
 }
+
+export interface USBDeviceInterface {
+	deviceId: number;
+	productId: number;
+	vendorId: number;
+}
+
+export interface ATCommandInterface {
+	command: string;
+	inResInclude: string;
+}

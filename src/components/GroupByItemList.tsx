@@ -1,9 +1,10 @@
 import { HStack, Image, VStack, Text, View, Pressable } from "native-base";
-import { TouchableOpacity, StyleSheet, ImageBackground } from "react-native";
+import { TouchableOpacity, StyleSheet, } from "react-native";
 import { SwipeItem, SwipeButtonsContainer } from "react-native-swipe-item";
 import { COLORS, IMAGES } from "../assets"
 import { GroupListItemInterface } from "../utils/Interfaces";
 import CircleImageBackground from "./CircleImageBackground";
+import moment from "moment";
 
 const GroupByItemList = (props: GroupListItemInterface) => {
     const { item, isSelectedFarmItem, onItemClick, onItemPlusClick } = props;
@@ -169,7 +170,7 @@ const GroupByItemList = (props: GroupListItemInterface) => {
                                 fontSize={12}
                                 color={getSubTextColors()}
                             >
-                                {props?.isCollectingSamplePage ? '1  Sample is collecting ...' : item.sampleCount + ' Samples collected'}
+                                {props?.isCollectingSamplePage ? '1  Sample is collected' : item.sampleCount + ' Samples collected'}
                             </Text>
                             <Text
                                 fontFamily={'Poppins-Regular'}
@@ -180,12 +181,12 @@ const GroupByItemList = (props: GroupListItemInterface) => {
                                 alignSelf={'flex-end'}
                                 marginLeft={5}
                             >
-                                {''}
-                                {/* {props?.isCollectingSamplePage ? '' : item.create_time.to} */}
+                                {''+ moment(new Date(item?.create_time)).fromNow()}
                             </Text>
                         </HStack>
                     </VStack>
 
+                    {!props?.isCollectingSamplePage ?             
                     <Pressable
                         backgroundColor={COLORS.brown_400}
                         borderTopLeftRadius={42}
@@ -206,6 +207,7 @@ const GroupByItemList = (props: GroupListItemInterface) => {
                             resizeMode="contain"
                         />
                     </Pressable>
+                    :<></>}
                 </HStack>
             </Pressable>
         </SwipeItem>
