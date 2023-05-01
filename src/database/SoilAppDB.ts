@@ -2,6 +2,7 @@ import { GroupByFarmListDoc, GroupListDoc, ReportByFarm, SoilDbName } from "./Db
 import PouchDB from 'pouchdb-react-native';
 import { CreateFarmsInterface, CreateFarmsItems, CreateGroupInterface, CreateGroupItems, ReportByFarmInterface, ReportByFarmItems } from "./Interfaces";
 import { EventEmitter } from 'events';
+import { endDateFormatToUTC } from "../utils/CommonUtils";
 
 export const initializeSoilDb = () => {
   return new PouchDB(SoilDbName);
@@ -182,21 +183,72 @@ export const saveReportByFarm = async (db: any, newItem: ReportByFarmItems) => {
 export const fetchAllReportDataByFarm = async (db: any, groupId: number, farm_id: number, toDate: string, fromDate?: string) => {
   const reportRes = await db.get(ReportByFarm);
   if (reportRes?.items?.length) {
-    const filteredData = reportRes.items.filter((item: ReportByFarmItems) => {
-      const to_Date = new Date(toDate);
-      const from_Date = new Date(fromDate || (new Date()).toString());
+    const to_Date = new Date(toDate);
+    const from_Date = fromDate ? new Date(fromDate) : new Date(endDateFormatToUTC((new Date()).toString()));
 
-      if(item.group_id === groupId && 
-        item.farm_id === farm_id &&
-        new Date(item.create_time).getDate() === to_Date.getDate() 
-       // &&
-        //new Date(item.create_time) <= from_Date
-        ){
-        return item
-       }
+    const filteredData = reportRes.items.filter((item: ReportByFarmItems) => {
+      if (toDate.length && fromDate?.length) {
+        if (item.group_id === groupId &&
+          item.farm_id === farm_id &&
+          (new Date(item.create_time) >= to_Date || new Date(item.create_time) === to_Date)
+          &&
+          (new Date(item.create_time) <= from_Date || new Date(item.create_time) === from_Date)
+        ) {
+          return item
+        }
+      } else if (toDate.length && !fromDate?.length) {
+        if (item.group_id === groupId &&
+          item.farm_id === farm_id &&
+          new Date(item.create_time).getDate() === to_Date.getDate()
+        ) {
+          return item
+        }
+      }
     }
-      
     );
     return filteredData || [] as ReportByFarmItems[];
+  }
+}
+
+export const fetchAllReportDataByDate = async (db: any, toDate: string, fromDate?: string) => {
+  const reportRes = await db.get(ReportByFarm);
+  if (reportRes?.items?.length) {
+    const to_Date = new Date(toDate);
+    const from_Date = fromDate ? new Date(fromDate) : new Date(endDateFormatToUTC((new Date()).toString()));
+
+    const filteredData = reportRes.items.filter((item: ReportByFarmItems) => {
+      if (toDate.length && fromDate?.length) {
+        if ((new Date(item.create_time) >= to_Date || new Date(item.create_time) === to_Date)
+          &&
+          (new Date(item.create_time) <= from_Date || new Date(item.create_time) === from_Date)
+        ) {
+          return item
+        }
+      }
+      else if (toDate.length && !fromDate?.length) {
+        if (new Date(item.create_time).getDate() === to_Date.getDate()
+          // &&
+          // new Date(item.create_time) <= from_Date
+        ) {
+          return item
+        }
+      }
+    });
+    return filteredData || [] as ReportByFarmItems[];
+  }
+}
+
+export const fetchSamplesCountByFarm = async (db: any, groupId: number, farm_id: number) => {
+  const reportRes = await db.get(ReportByFarm);
+  if (reportRes?.items?.length) {
+    const filteredData = reportRes.items.filter((item: ReportByFarmItems) => {
+      if (item.group_id === groupId &&
+        item.farm_id === farm_id
+      ) {
+        return item
+      }
+    }
+    );
+    return filteredData?.length || 0;
   }
 }

@@ -70,6 +70,11 @@ export const dateFormatToUTC = (date: string)=> {
   return newFormatDate;
 }
 
+export const endDateFormatToUTC = (date: string)=> {
+  const newFormatDate = moment(date).format('YYYY-MM-DDT23:59:59.000Z');
+  return newFormatDate;
+}
+
 export const bin2String = (array: any)=> {
   let result = "";
   for (let i = 0; i < array.length; i++) {

@@ -1,4 +1,4 @@
-import { CreateFarmsItems, CreateGroupItems } from "../database/Interfaces";
+import { CreateFarmsItems, CreateGroupItems, ReportByFarmItems } from "../database/Interfaces";
 
 export interface GroupTabItemInterface {
     item: CreateGroupItems,
@@ -97,4 +97,27 @@ export interface USBDeviceInterface {
 export interface ATCommandInterface {
 	command: string;
 	inResInclude: string;
+}
+
+export interface ReportListItemInterface {
+    item: ReportByFarmItems,
+    isCollectingSamplePage?: boolean,
+    isSelectedFarmItem?: ReportByFarmItems,
+    onItemClick?: () => void,
+}
+
+export interface GraphGroupDataInterface {
+    allInOneGraph:  GraphBarDataInterface,
+    allSeparateGraph: GraphBarDataInterface[],
+}
+
+export interface GraphBarDataInterface {
+    graphHeader: string,
+    key: string,
+    graphData: GraphSingleData[],
+}
+
+export interface GraphSingleData {
+    value: number,
+    label: string,
 }

@@ -1,8 +1,9 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 //ASSETS
-import {COLORS, IMAGES} from '../assets';
+import { COLORS, IMAGES } from '../assets';
 
 import {
+  ActivityIndicator,
   BackHandler,
   PermissionsAndroid,
   Platform,
@@ -10,10 +11,10 @@ import {
   TouchableOpacity,
 } from 'react-native';
 //import { RNText } from '../components';
-import {VStack, Text, View, HStack, Image, ScrollView} from 'native-base';
-import {Button, Statusbar, Input, Header, GroupTabItem, DateTimePicker} from '../components';
-import {BarChart, LineChart} from 'react-native-gifted-charts';
-import { getGraphReportData} from '../utils/GraphData';
+import { VStack, Text, View, HStack, Image, ScrollView } from 'native-base';
+import { Button, Statusbar, Input, Header, GroupTabItem, DateTimePicker } from '../components';
+import { BarChart, LineChart } from 'react-native-gifted-charts';
+import { getGraphReportData, getSelectedGraphReportData } from '../utils/GraphData';
 import GroupByItemList from '../components/GroupByItemList';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -22,27 +23,32 @@ import {
   UART_Baud_Rate,
   dateFormatToDDMMYYYY,
   dateFormatToUTC,
+  endDateFormatToUTC,
   getDeviceData,
   getSeparatedValues,
   hexStringToByteArray,
   showToast,
   stringToHex,
 } from '../utils/CommonUtils';
-import {BleManager, Characteristic, Device} from 'react-native-ble-plx';
-import {Codes, Parity, UsbSerialManager} from '../usbSerialModule';
-import {ATCommandInterface, USBDeviceInterface} from '../utils/Interfaces';
-import {ALL_AT_COMMANDS} from '../utils/Ble_UART_At_Command';
-import {ReportByFarmItems} from '../database/Interfaces';
+import { BleManager, Characteristic, Device } from 'react-native-ble-plx';
+import { Codes, Parity, UsbSerialManager } from '../usbSerialModule';
+import { ATCommandInterface, GraphBarDataInterface, USBDeviceInterface } from '../utils/Interfaces';
+import { ALL_AT_COMMANDS } from '../utils/Ble_UART_At_Command';
+import { CreateFarmsItems, ReportByFarmItems } from '../database/Interfaces';
 import {
   fetchAllReportDataByFarm,
+  fetchSamplesCountByFarm,
   initializeSoilDb,
   saveReportByFarm,
+  updateFarmData,
 } from '../database/SoilAppDB';
+import ReportByFarmItemList from '../components/ReportByFarmItems';
+import StartEndDatePicker from '../components/StartEndDatePicker';
 
 const manager = new BleManager();
 
 const GroupItemDetails = (props: any) => {
-  const {farmData} = props.route?.params;
+  const { farmData } = props.route?.params;
   const db = initializeSoilDb();
   const [state, setState] = useState({
     isFarmLoading: false,
@@ -52,10 +58,13 @@ const GroupItemDetails = (props: any) => {
     isConnectedBy: '' as string,
     bleCharacteristic: [] as any,
     reportByFarmList: [] as ReportByFarmItems[],
-    allGraphReportData: [] as any,
+    isSelectedFarmItem: {} as ReportByFarmItems,
+    allGraphReportData: [] as GraphBarDataInterface[],
+    allInOneReportData: {} as GraphBarDataInterface,
     filterByToDate: dateFormatToUTC((new Date()).toString()),
-    filterByFromDate:'',
+    filterByFromDate: '',
     openDatePicker: false,
+    isAllInOneGraphOpen: true,
   });
   const [allNotifyData, setAllNotifyData] = useState([] as string[]);
   const deviceName = 'SS_7IN1';
@@ -80,8 +89,29 @@ const GroupItemDetails = (props: any) => {
 
   useEffect(() => {
     getAllReportByFarmLists(state.filterByToDate);
-  }, [props, state.filterByToDate]);
+    updateSampleCountByFarm();
+  }, [props]);
 
+  const updateSampleCountByFarm = async () => {
+    const farmReportLength = await fetchSamplesCountByFarm(
+      db,
+      farmData.group_id,
+      farmData.farm_id,
+    );
+    try {
+      const newItem = {
+        sampleCount: farmReportLength,
+        update_time: new Date(),
+      } as CreateFarmsItems;
+      const updateFarmRes = await updateFarmData(
+        db,
+        newItem,
+        farmData
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  }
   const getAllReportByFarmLists = async (toDate: string, fromDate?: string) => {
     setState((prev) => {
       return {
@@ -98,17 +128,37 @@ const GroupItemDetails = (props: any) => {
     );
     if (allReportRes?.length) {
       const allGraphReportData = await getGraphReportData(allReportRes);
-     // console.log('rrr666 ', JSON.stringify(allGraphReportData))
+      //console.log('rrr666 ', JSON.stringify(allGraphReportData))
       setState((prev) => {
         return {
           ...prev,
           reportByFarmList: allReportRes,
-          allGraphReportData: allGraphReportData,
+          allGraphReportData: allGraphReportData.allSeparateGraph,
+          allInOneReportData: allGraphReportData.allInOneGraph,
           isFarmLoading: false,
+        };
+      });
+    } else {
+      setState((prev) => {
+        return {
+          ...prev,
+          isFarmLoading: false,
+          reportByFarmList: [],
+          allGraphReportData: [],
         };
       });
     }
   };
+
+  const setSelectedGraphData = async (selectedSample: ReportByFarmItems) => {
+    const allGraphReportData = await getSelectedGraphReportData(selectedSample);
+    setState((prev) => {
+      return {
+        ...prev,
+        allGraphReportData: allGraphReportData,
+      };
+    });
+  }
 
   const checkUsbSerial = async () => {
     if (Platform.OS === 'android') {
@@ -311,6 +361,8 @@ const GroupItemDetails = (props: any) => {
     const saveFarmReportRes = await saveReportByFarm(db, newItem);
     if (saveFarmReportRes?.ok) {
       showToast('Farm report saved successfully');
+      updateSampleCountByFarm();
+      getAllReportByFarmLists(state.filterByToDate, state.filterByFromDate);
     }
   };
 
@@ -357,7 +409,7 @@ const GroupItemDetails = (props: any) => {
                     fontWeight={600}
                     fontFamily={'Poppins-Regular'}
                     color={COLORS.black_400}
-                    //style={{ alignSelf: 'center', justifyContent: 'center' }}
+                  //style={{ alignSelf: 'center', justifyContent: 'center' }}
                   >
                     Soil Report
                   </Text>
@@ -377,7 +429,7 @@ const GroupItemDetails = (props: any) => {
                 </VStack>
                 <HStack>
                   <TouchableOpacity
-                   style={{justifyContent: 'center', alignItems: 'center'}}
+                    style={{ justifyContent: 'center', alignItems: 'center' }}
                     onPress={() => {
                       setState((prev) => {
                         return {
@@ -387,110 +439,185 @@ const GroupItemDetails = (props: any) => {
                       })
                     }}
                   >
-                  <HStack marginRight={2}>
-                    <Text
-                      fontSize={10}
-                      fontWeight={500}
-                      fontFamily={'Poppins-Regular'}
-                      color={COLORS.black_200}
-                      style={{
-                        paddingRight: 5,
-                        alignSelf: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      {`${dateFormatToDDMMYYYY(state.filterByToDate)} ${state.filterByFromDate ? '-' + dateFormatToDDMMYYYY(state.filterByFromDate) : ''}`}
-                    </Text>
+                    <HStack marginRight={2}>
+                      <Text
+                        fontSize={10}
+                        fontWeight={500}
+                        fontFamily={'Poppins-Regular'}
+                        color={COLORS.black_200}
+                        style={{
+                          paddingRight: 5,
+                          alignSelf: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        {`${dateFormatToDDMMYYYY(state.filterByToDate)} ${state.filterByFromDate ? '-' + dateFormatToDDMMYYYY(state.filterByFromDate) : ''}`}
+                      </Text>
 
-                    <Image
-                      style={styles.calendarIcon}
-                      source={IMAGES.CalendarIcon}
-                      resizeMode="contain"
-                    />
-                  </HStack>
+                      <Image
+                        style={styles.calendarIcon}
+                        source={IMAGES.CalendarIcon}
+                        resizeMode="contain"
+                      />
+                    </HStack>
                   </TouchableOpacity>
-                  <View style={styles.graphIconBg}>
+                  <TouchableOpacity
+                    style={styles.graphIconBg}
+                    onPress={() => {
+                      setState((prev) => {
+                        return {
+                          ...prev,
+                          isAllInOneGraphOpen: !state.isAllInOneGraphOpen,
+                        }
+                      })
+                    }}
+                  >
                     <Image
                       style={styles.graphIcon}
                       source={IMAGES.GraphIcon}
                       resizeMode="contain"
                     />
-                  </View>
+                  </TouchableOpacity>
                 </HStack>
               </HStack>
 
-          {state.allGraphReportData?.length > 0 ?
+              {state.isFarmLoading ?
+                <View height={323} justifyContent={'center'} alignItems={'center'}>
+                  <ActivityIndicator size="large" color={COLORS.brown_500} />
+                </View>
+                :
+                state.isAllInOneGraphOpen ?
+                  state.allGraphReportData?.length > 0 ?
+                    <View
+                      flex={1}
+                      height={323}
+                      width={323}
+                      backgroundColor={COLORS.white}
+                      ml={10}
+                      mt={10}
+                    //borderRadius={16}
+                    >
+                      {/* <Text
+                  mb={2}
+                  fontSize={16}
+                  fontWeight={500}
+                  fontFamily={'Poppins-Regular'}
+                  color={COLORS.black}
+                  style={{ marginLeft: 5, paddingLeft: 5 }}
+                >
+                  {state.allInOneReportData.graphHeader}
+                </Text> */}
+                      <BarChart
+                        horizontal
+                        width={260}
+                        height={260}
+                        barWidth={12}
+                        //noOfSections={3}
+                        barBorderRadius={4}
+                        frontColor="lightgray"
+                        data={state.allInOneReportData.graphData}
+                        yAxisThickness={0}
+                        xAxisThickness={0}
+                        labelWidth={50}
+                        xAxisLabelTextStyle={{ fontSize: 8, marginBottom: 25, marginTop: -10 }}
+                      />
+                    </View>
+                    :
+                    <View height={323} justifyContent={'center'} alignItems={'center'}>
+                      <Text color={COLORS.black_200}>No Reports Available</Text>
+                    </View>
+                  :
+                  state.allGraphReportData?.length > 0 ?
+                    <ScrollView
+                      flex={1}
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      style={styles.pagerView}
+                    >
+                      {
+                        state.allGraphReportData?.map((item: any) => {
+                          return (
+                            <View
+                              flex={1}
+                              justifyContent={'center'}
+                              height={323}
+                              width={345}
+                              backgroundColor={COLORS.white}
+                              ml={2}
+                              mr={10}
+                              borderRadius={16}
+                            >
+                              <Text
+                                mb={2}
+                                fontSize={16}
+                                fontWeight={500}
+                                fontFamily={'Poppins-Regular'}
+                                color={COLORS.black}
+                                style={{ marginLeft: 5, paddingLeft: 5 }}
+                              >
+                                {item.graphHeader}
+                              </Text>
+                              <BarChart
+                                // areaChart
+                                width={400}
+                                //height={280}
+                                barWidth={12}
+                                //noOfSections={3}
+                                barBorderRadius={4}
+                                frontColor="lightgray"
+                                data={item.graphData}
+                                yAxisThickness={0}
+                                xAxisThickness={0}
+                                labelWidth={50}
+                                xAxisLabelTextStyle={{ fontSize: 8 }}
+                              />
+                            </View>
+                          );
+                        })
+                      }
+                    </ScrollView>
+                    : <View height={323} justifyContent={'center'} alignItems={'center'}>
+                      <Text color={COLORS.black_200}>No Reports Available</Text>
+                    </View>
+              }
               <ScrollView
-                flex={1}
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                style={styles.pagerView}
-              >
-                {
-                  state.allGraphReportData?.map((item: any) => {
-                    return (
-                      <View
-                        flex={1}
-                        justifyContent={'center'}
-                        height={323}
-                        width={345}
-                        backgroundColor={COLORS.white}
-                        ml={2}
-                        mr={10}
-                        borderRadius={16}
-                      >
-                        <Text
-                          mb={2}
-                          fontSize={16}
-                          fontWeight={500}
-                          fontFamily={'Poppins-Regular'}
-                          color={COLORS.black}
-                          style={{ marginLeft: 5, paddingLeft: 5 }}
-                        >
-                          {item.graphHeader}
-                        </Text>
-                        <BarChart 
-                         // areaChart
-                         // width={400}
-                          //height={280}
-                          barWidth={12}
-                          //noOfSections={3}
-                          barBorderRadius={4}
-                          frontColor="lightgray"
-                          data={item.graphData}
-                          yAxisThickness={0}
-                          xAxisThickness={0}
-                          labelWidth={50}
-                          xAxisLabelTextStyle={{fontSize: 8}}
-                        />
-                      </View>
-                    );
-                  })
-                }
-              </ScrollView>
-              : <></>}
-
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={{marginTop: 10}}
+                style={{ marginTop: 10 }}
               >
                 <GroupTabItem item={farmData} isSelectedGroup={farmData} />
               </ScrollView>
 
-              {!state.isFarmLoading && state.reportByFarmList?.length > 0 && (
-                <View overflow={'scroll'}>
-                  {state.reportByFarmList.map((item: ReportByFarmItems) => {
-                    return (
-                      <GroupByItemList
-                        item={item}
-                        isCollectingSamplePage={true}
-                        //isSelectedFarmItem={farmData}
-                      />
-                    );
-                  })}
+              {state.isFarmLoading ?
+                <View justifyContent={'center'} alignItems={'center'}>
+                  <ActivityIndicator size="large" color={COLORS.brown_500} />
                 </View>
-              )}
+                : state.reportByFarmList?.length > 0 ? (
+                  <View overflow={'scroll'}>
+                    {state.reportByFarmList.map((item: ReportByFarmItems) => {
+                      return (
+                        <ReportByFarmItemList
+                          item={item}
+                          isCollectingSamplePage={true}
+                          isSelectedFarmItem={state.isSelectedFarmItem}
+                          onItemClick={() => {
+                            setState((prev) => {
+                              return {
+                                ...prev,
+                                isSelectedFarmItem: item,
+                              }
+                            });
+                            setSelectedGraphData(item);
+                          }}
+                        />
+                      );
+                    })}
+                  </View>
+                ) :
+                  <View mt={10} justifyContent={'center'} alignItems={'center'}>
+                    <Text color={COLORS.black_200}>No Samples Available</Text>
+                  </View>
+              }
 
               <Button
                 text={'Save Record'}
@@ -511,13 +638,18 @@ const GroupItemDetails = (props: any) => {
                       } else {
                         connectToDevice(state.connectedBleDevice);
                       }
-                    } else if (state.isConnectedBy === 'USB'){
+                    } else if (state.isConnectedBy === 'USB') {
                       if (Platform.OS === 'android') {
-                        readAndWriteDataFromUsbSerial(
-                          state.connectedUsbDevice.deviceId
-                        );
+                        const devices = await UsbSerialManager.list();
+                        if (devices?.length > 0) {
+                          readAndWriteDataFromUsbSerial(
+                            state.connectedUsbDevice.deviceId
+                          );
+                        } else {
+                          showToast('Please connect device')
+                        }
                       }
-                    }else{
+                    } else {
                       showToast('Please connect device')
                     }
                   }
@@ -528,19 +660,29 @@ const GroupItemDetails = (props: any) => {
           </ScrollView>
         </VStack>
         {state.openDatePicker &&
-          <DateTimePicker
-            selectedDate={state.filterByToDate}
-            onDateChange={(date: any) => {
-              setState((prev)=> {
-                return {
-                  ...prev,
-                  openDatePicker: false,
-                  filterByToDate: dateFormatToUTC(date),
-                }
-              })
-             // getAllReportByFarmLists(dateFormatToUTC(date));
-            }}
-          />
+        <StartEndDatePicker
+        visible={state.openDatePicker}
+        onClose={() => {
+         setState((prev) => {
+           return {
+             ...prev,
+             openDatePicker: false,
+           };
+         });
+       }}
+        onDateApply={(startDate: any, endDate: any) => {
+          setState((prev) => {
+            return {
+              ...prev,
+              openDatePicker: false,
+              filterByToDate: dateFormatToUTC(startDate),
+              filterByFromDate: endDateFormatToUTC(endDate),
+              isSelectedFarmItem: {} as ReportByFarmItems,
+            }
+          })
+          getAllReportByFarmLists(dateFormatToUTC(startDate), endDateFormatToUTC(endDate));
+         }}
+       />
         }
       </View>
     </>
@@ -574,7 +716,7 @@ const styles = StyleSheet.create({
   pagerView: {
     flex: 1,
     height: 350,
-   // justifyContent: 'center'
+    // justifyContent: 'center'
   },
 });
 
