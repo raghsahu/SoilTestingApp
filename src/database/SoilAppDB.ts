@@ -181,7 +181,10 @@ export const saveReportByFarm = async (db: any, newItem: ReportByFarmItems) => {
 }
 
 export const fetchAllReportDataByFarm = async (db: any, groupId: number, farm_id: number, toDate: string, fromDate?: string) => {
-  const reportRes = await db.get(ReportByFarm);
+  const reportRes = await db.get(ReportByFarm)
+  .catch((err: any)=> {
+    console.log('rrrErr ', err)
+  });
   if (reportRes?.items?.length) {
     const to_Date = new Date(toDate);
     const from_Date = fromDate ? new Date(fromDate) : new Date(endDateFormatToUTC((new Date()).toString()));
@@ -207,11 +210,17 @@ export const fetchAllReportDataByFarm = async (db: any, groupId: number, farm_id
     }
     );
     return filteredData || [] as ReportByFarmItems[];
+  }else{
+    return [] as ReportByFarmItems[];
   }
 }
 
 export const fetchAllReportDataByDate = async (db: any, toDate: string, fromDate?: string) => {
-  const reportRes = await db.get(ReportByFarm);
+  const reportRes = await db.get(ReportByFarm)
+  .catch((err: any)=> {
+    console.log('rrrErr ', err)
+  });
+
   if (reportRes?.items?.length) {
     const to_Date = new Date(toDate);
     const from_Date = fromDate ? new Date(fromDate) : new Date(endDateFormatToUTC((new Date()).toString()));
@@ -235,11 +244,16 @@ export const fetchAllReportDataByDate = async (db: any, toDate: string, fromDate
       }
     });
     return filteredData || [] as ReportByFarmItems[];
+  }else{
+    return [] as ReportByFarmItems[];
   }
 }
 
 export const fetchSamplesCountByFarm = async (db: any, groupId: number, farm_id: number) => {
-  const reportRes = await db.get(ReportByFarm);
+  const reportRes = await db.get(ReportByFarm)
+  .catch((err: any)=> {
+    console.log('rrrErr ', err)
+  });;
   if (reportRes?.items?.length) {
     const filteredData = reportRes.items.filter((item: ReportByFarmItems) => {
       if (item.group_id === groupId &&
@@ -250,5 +264,7 @@ export const fetchSamplesCountByFarm = async (db: any, groupId: number, farm_id:
     }
     );
     return filteredData?.length || 0;
+  }else{
+    return 0;
   }
 }

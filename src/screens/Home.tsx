@@ -87,26 +87,35 @@ const Home = (props: any) => {
 
   useEffect(() => {
     getAllGroupLists();
-    getAllReportByDate(state.filterByToDate);
+    //getAllReportByDate(state.filterByToDate);
   }, [props]);
 
-  useEffect(() => {
-    if (state.isSelectedGroup?.group_id) {
-      setState((prev) => {
-        return {
-          ...prev,
-          isFarmLoading: true,
-        };
-      });
-      fetchGroupByFarmList(state.isSelectedGroup?.group_id);
-    }
-  }, [state.isSelectedGroup]);
+  // useEffect(() => {
+  //   if (state.isSelectedGroup?.group_id) {
+  //     setState((prev) => {
+  //       return {
+  //         ...prev,
+  //         isFarmLoading: true,
+  //       };
+  //     });
+  //     fetchGroupByFarmList(state.isSelectedGroup?.group_id);
+  //   }
+  // }, [state.isSelectedGroup]);
 
   // Refresh data on focus
   useFocusEffect(
     useCallback(() => {
       getProfileDataFromLocalStorage();
-      //fetchGroupByFarmList(state.isSelectedGroup?.group_id);
+      getAllReportByDate(state.filterByToDate);
+      if (state.isSelectedGroup?.group_id) {
+        setState((prev) => {
+          return {
+            ...prev,
+            isFarmLoading: true,
+          };
+        });
+        fetchGroupByFarmList(state.isSelectedGroup?.group_id);
+      }
     }, [])
   );
 
@@ -118,7 +127,6 @@ const Home = (props: any) => {
       };
     });
     const allReportRes = await fetchAllReportDataByDate(db, toDate, fromDate);
-   // console.log('rrr555 ', allReportRes.length)
     if (allReportRes?.length > 0) {
       const allGraphReportData = await getGraphReportData(allReportRes);
       setState((prev) => {
@@ -162,7 +170,9 @@ const Home = (props: any) => {
             : allGroupRes[0],
         };
       });
-      //fetchGroupByFarmList(state.isSelectedGroup?.group_id || allGroupRes[0].group_id);
+      fetchGroupByFarmList(state.isSelectedGroup?.group_id
+        ? state.isSelectedGroup?.group_id
+        : allGroupRes[0]?.group_id);
     }
   };
 
@@ -182,6 +192,7 @@ const Home = (props: any) => {
         return {
           ...prev,
           isFarmLoading: false,
+          groupByFarmList: [] as CreateFarmsItems[],
         };
       });
     }
@@ -550,6 +561,15 @@ const Home = (props: any) => {
                             isSelectedGroup: item,
                           };
                         });
+                        if (item?.group_id) {
+                          setState((prev) => {
+                            return {
+                              ...prev,
+                              isFarmLoading: true,
+                            };
+                          });
+                          fetchGroupByFarmList(item?.group_id);
+                        }
                       }}
                       onTabLongClick={() => {
                         setState((prev) => {

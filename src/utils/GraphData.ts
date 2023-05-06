@@ -137,7 +137,7 @@ export const convertAllInOneGraphData = (graphAllBarData: GraphBarDataInterface[
                 return prev  +current.value
               }, 0);
             const tempData = {
-                value: sum/item.graphData?.length,
+                value: sum/item.graphData?.length || 0,
                 label: item.key
             }
             averageGraphData.graphData.push(tempData)
@@ -146,7 +146,7 @@ export const convertAllInOneGraphData = (graphAllBarData: GraphBarDataInterface[
                 return prev  +current.value
               }, 0);
             const tempData = {
-                value: sum/item.graphData?.length,
+                value: sum/item.graphData?.length || 0,
                 label: item.key
             }
             averageGraphData.graphData.push(tempData)
@@ -156,7 +156,7 @@ export const convertAllInOneGraphData = (graphAllBarData: GraphBarDataInterface[
                 return prev  +current.value
               }, 0);
             const tempData = {
-                value: sum/item.graphData?.length,
+                value: sum/item.graphData?.length || 0,
                 label: item.key
             }
             averageGraphData.graphData.push(tempData)
@@ -166,7 +166,7 @@ export const convertAllInOneGraphData = (graphAllBarData: GraphBarDataInterface[
                 return prev  +current.value
               }, 0);
             const tempData = {
-                value: sum/item.graphData?.length,
+                value: sum/item.graphData?.length || 0,
                 label: item.key
             }
             averageGraphData.graphData.push(tempData)
@@ -176,7 +176,7 @@ export const convertAllInOneGraphData = (graphAllBarData: GraphBarDataInterface[
                 return prev  +current.value
               }, 0);
             const tempData = {
-                value: sum/item.graphData?.length,
+                value: sum/item.graphData?.length || 0,
                 label: item.key
             }
             averageGraphData.graphData.push(tempData)
@@ -186,7 +186,7 @@ export const convertAllInOneGraphData = (graphAllBarData: GraphBarDataInterface[
                 return prev  +current.value
               }, 0);
             const tempData = {
-                value: sum/item.graphData?.length,
+                value: sum/item.graphData?.length || 0,
                 label: item.key
             }
             averageGraphData.graphData.push(tempData)
@@ -196,7 +196,7 @@ export const convertAllInOneGraphData = (graphAllBarData: GraphBarDataInterface[
                 return prev  +current.value
               }, 0);
             const tempData = {
-                value: sum/item.graphData?.length,
+                value: sum/item.graphData?.length || 0,
                 label: item.key
             }
             averageGraphData.graphData.push(tempData)

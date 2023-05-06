@@ -77,6 +77,7 @@ const Otp = (props: any) => {
                     <Input
                         style={{marginTop: 5}}
                         placeholder={'Enter OTP'}
+                        keyboardType="numeric"
                         inputText={verificationCode}
                         onChangeText={(text: string) => setVerificationCode(text)}
                     />

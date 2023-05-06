@@ -133,8 +133,8 @@ const GroupItemDetails = (props: any) => {
         return {
           ...prev,
           reportByFarmList: allReportRes,
-          allGraphReportData: allGraphReportData.allSeparateGraph,
-          allInOneReportData: allGraphReportData.allInOneGraph,
+         allGraphReportData: allGraphReportData.allSeparateGraph,
+         allInOneReportData: allGraphReportData.allInOneGraph,
           isFarmLoading: false,
         };
       });
@@ -217,7 +217,11 @@ const GroupItemDetails = (props: any) => {
     });
     ALL_AT_COMMANDS.map(async (data: ATCommandInterface) => {
       const hexStr = stringToHex(data.command);
-      await usbSerialport.send(hexStr);
+      await usbSerialport.send(hexStr)
+      .catch((err: any)=>{
+        console.log('cmd send failed ', err)
+        showToast(err)
+      });
     });
     const allData = [] as string[];
     const sub = usbSerialport.onReceived((event) => {
@@ -226,8 +230,10 @@ const GroupItemDetails = (props: any) => {
       allData.push(readableString);
     });
     setTimeout(() => {
-      extractAllRes(allData);
-    }, 3000);
+      if(allData.length){
+        extractAllRes(allData);
+      }
+    }, 5000);
     // unsubscribe
     sub.remove();
   };
@@ -346,7 +352,9 @@ const GroupItemDetails = (props: any) => {
 
   const extractAllRes = useCallback(async (allNotifyData: any) => {
     const uniqueArray = [...new Set(allNotifyData)];
+    console.log('rrr346u88 ', JSON.stringify(uniqueArray))
     const allValuesAre = await getSeparatedValues(uniqueArray);
+    console.log('rrr22332 ', JSON.stringify(allValuesAre))
     storeDatailInDb(allValuesAre);
   }, []);
 
@@ -642,9 +650,10 @@ const GroupItemDetails = (props: any) => {
                       if (Platform.OS === 'android') {
                         const devices = await UsbSerialManager.list();
                         if (devices?.length > 0) {
-                          readAndWriteDataFromUsbSerial(
-                            state.connectedUsbDevice.deviceId
-                          );
+                          connectUsbSerialPort(devices)
+                          // readAndWriteDataFromUsbSerial(
+                          //   state.connectedUsbDevice.deviceId
+                          // );
                         } else {
                           showToast('Please connect device')
                         }

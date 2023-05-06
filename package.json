@@ -22,6 +22,7 @@
     "@realm/react": "^0.1.0",
     "@types/i18n-js": "^3.8.4",
     "@types/lodash": "^4.14.191",
+    "libphonenumber-js": "^1.10.30",
     "moment": "^2.29.4",
     "native-base": "^3.4.28",
     "pouchdb-react-native": "^6.4.1",

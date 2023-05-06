@@ -13,7 +13,7 @@ import { InputInterface } from '../utils/Interfaces';
  * @property {string} label - input title header text
  */
 
-const Input = (props: InputInterface) => {
+const Input = (props: any) => {
 
     const [open, setOpen] = useState(false);
 

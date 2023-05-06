@@ -46,6 +46,8 @@ const Login = (props: any) => {
                       label={'Mobile No'}
                       placeholder={'Enter Mobile No'}
                       inputText={phoneNumber}
+                      keyboardType="numeric"
+                      maxLength={10}
                       onChangeText={(text: string) => setPhoneNumber(text)}
                   />
                   <Button
