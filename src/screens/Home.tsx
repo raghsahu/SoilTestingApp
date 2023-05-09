@@ -658,7 +658,7 @@ const Home = (props: any) => {
                         }}
                         onDeleteClick={() => {
                           openConfirmationAlert(
-                            `Are You Sure You Want to delete ${item.farm_name} ?`,
+                            `Are You Sure You Want to Delete ${item.farm_name} ?`,
                             true
                           );
                         }}
@@ -729,7 +729,7 @@ const Home = (props: any) => {
           }}
           onDelete={(item: CreateGroupItems) => {
             openConfirmationAlert(
-              `Are You Sure You Want to delete ${item.group_name} ?`,
+              `Are You Sure You Want to Delete ${item.group_name} ?`,
               false
             );
           }}

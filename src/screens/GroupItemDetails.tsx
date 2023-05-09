@@ -601,13 +601,6 @@ const GroupItemDetails = (props: any) => {
                       <Text color={COLORS.black_200}>No Reports Available</Text>
                     </View>
               }
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={{ marginTop: 10 }}
-              >
-                <GroupTabItem item={farmData} isSelectedGroup={farmData} />
-              </ScrollView>
 
               {state.isFarmLoading ?
                 <View justifyContent={'center'} alignItems={'center'}>
