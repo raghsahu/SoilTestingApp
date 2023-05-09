@@ -133,8 +133,8 @@ const GroupItemDetails = (props: any) => {
         return {
           ...prev,
           reportByFarmList: allReportRes,
-         allGraphReportData: allGraphReportData.allSeparateGraph,
-         allInOneReportData: allGraphReportData.allInOneGraph,
+          allGraphReportData: allGraphReportData.allSeparateGraph,
+          allInOneReportData: allGraphReportData.allInOneGraph,
           isFarmLoading: false,
         };
       });
@@ -161,25 +161,29 @@ const GroupItemDetails = (props: any) => {
   }
 
   const checkUsbSerial = async () => {
-    if (Platform.OS === 'android') {
-      const devices = await UsbSerialManager.list();
-      if (devices?.length > 0) {
-        connectUsbSerialPort(devices);
-      } else {
-        checkBleSerial();
-      }
-    } else {
+    // if (Platform.OS === 'android') {
+    //   const devices = await UsbSerialManager.list();
+    //   if (devices?.length > 0) {
+    //     connectUsbSerialPort(devices);
+    //   } else {
+    //     checkBleSerial();
+    //   }
+    // } else {
       checkBleSerial();
-    }
+    //}
   };
 
-  const checkBleSerial = () => {
+  const checkBleSerial = async () => {
     // Subscribe to BLE state changes
-    const subscription = manager.onStateChange((state) => {
+    const subscription = manager.onStateChange(async (state) => {
       if (state === 'PoweredOn') {
         checkDeviceAndConnect();
       } else {
         if (Platform.OS === 'android') {
+          const devices = await UsbSerialManager.list();
+          if (devices?.length > 0) {
+            connectUsbSerialPort(devices);
+          }
         }
       }
     }, true);
@@ -218,10 +222,10 @@ const GroupItemDetails = (props: any) => {
     ALL_AT_COMMANDS.map(async (data: ATCommandInterface) => {
       const hexStr = stringToHex(data.command);
       await usbSerialport.send(hexStr)
-      .catch((err: any)=>{
-        console.log('cmd send failed ', err)
-        showToast(err)
-      });
+        .catch((err: any) => {
+          console.log('cmd send failed ', err)
+          showToast(err)
+        });
     });
     const allData = [] as string[];
     const sub = usbSerialport.onReceived((event) => {
@@ -230,7 +234,7 @@ const GroupItemDetails = (props: any) => {
       allData.push(readableString);
     });
     setTimeout(() => {
-      if(allData.length){
+      if (allData.length) {
         extractAllRes(allData);
       }
     }, 5000);
@@ -669,29 +673,29 @@ const GroupItemDetails = (props: any) => {
           </ScrollView>
         </VStack>
         {state.openDatePicker &&
-        <StartEndDatePicker
-        visible={state.openDatePicker}
-        onClose={() => {
-         setState((prev) => {
-           return {
-             ...prev,
-             openDatePicker: false,
-           };
-         });
-       }}
-        onDateApply={(startDate: any, endDate: any) => {
-          setState((prev) => {
-            return {
-              ...prev,
-              openDatePicker: false,
-              filterByToDate: dateFormatToUTC(startDate),
-              filterByFromDate: endDateFormatToUTC(endDate),
-              isSelectedFarmItem: {} as ReportByFarmItems,
-            }
-          })
-          getAllReportByFarmLists(dateFormatToUTC(startDate), endDateFormatToUTC(endDate));
-         }}
-       />
+          <StartEndDatePicker
+            visible={state.openDatePicker}
+            onClose={() => {
+              setState((prev) => {
+                return {
+                  ...prev,
+                  openDatePicker: false,
+                };
+              });
+            }}
+            onDateApply={(startDate: any, endDate: any) => {
+              setState((prev) => {
+                return {
+                  ...prev,
+                  openDatePicker: false,
+                  filterByToDate: dateFormatToUTC(startDate),
+                  filterByFromDate: endDateFormatToUTC(endDate),
+                  isSelectedFarmItem: {} as ReportByFarmItems,
+                }
+              })
+              getAllReportByFarmLists(dateFormatToUTC(startDate), endDateFormatToUTC(endDate));
+            }}
+          />
         }
       </View>
     </>
