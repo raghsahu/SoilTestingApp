@@ -453,26 +453,15 @@ const Home = (props: any) => {
                     mt={5}
                     borderRadius={16}
                     flex={1}
-                    width={360}
+                    width={345}
                     ml={2}
-                  // mr={10}
+                    mr={10}
                   >
-                    {/* <Text
-            mb={2}
-            fontSize={16}
-            fontWeight={500}
-            fontFamily={'Poppins-Regular'}
-            color={COLORS.black}
-            style={{ marginLeft: 5, paddingLeft: 5 }}
-          >
-            {state.allInOneReportData.graphHeader}
-          </Text> */}
-                    <View mt={3} ml={12}>
                       <BarChart
-                        horizontal
-                        width={260}
-                        height={260}
-                        barWidth={12}
+                        //horizontal
+                       // width={260}
+                        //height={260}
+                        barWidth={8}
                         //noOfSections={3}
                         barBorderRadius={4}
                         frontColor="lightgray"
@@ -480,9 +469,9 @@ const Home = (props: any) => {
                         yAxisThickness={0}
                         xAxisThickness={0}
                         labelWidth={50}
-                        xAxisLabelTextStyle={{ fontSize: 8, marginBottom: 25, marginTop: -10 }}
+                        //xAxisLabelTextStyle={{ fontSize: 8, marginBottom: 25, marginTop: -10 }}
+                        xAxisLabelTextStyle={{ fontSize: 8 }}
                       />
-                    </View>
                   </View>
                   :
                   <View height={323} justifyContent={'center'} alignItems={'center'}>
@@ -520,7 +509,7 @@ const Home = (props: any) => {
                             {item.graphHeader}
                           </Text>
                           <BarChart
-                            barWidth={12}
+                            barWidth={8}
                             //noOfSections={3}
                             barBorderRadius={4}
                             frontColor="lightgray"

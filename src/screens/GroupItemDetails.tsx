@@ -26,13 +26,14 @@ import {
   endDateFormatToUTC,
   getDeviceData,
   getSeparatedValues,
+  getUserData,
   hexStringToByteArray,
   showToast,
   stringToHex,
 } from '../utils/CommonUtils';
 import { BleManager, Characteristic, Device } from 'react-native-ble-plx';
 import { Codes, Parity, UsbSerialManager } from '../usbSerialModule';
-import { ATCommandInterface, GraphBarDataInterface, USBDeviceInterface } from '../utils/Interfaces';
+import { ATCommandInterface, GraphBarDataInterface, USBDeviceInterface, UserInterface } from '../utils/Interfaces';
 import { ALL_AT_COMMANDS } from '../utils/Ble_UART_At_Command';
 import { CreateFarmsItems, ReportByFarmItems } from '../database/Interfaces';
 import {
@@ -44,12 +45,14 @@ import {
 } from '../database/SoilAppDB';
 import ReportByFarmItemList from '../components/ReportByFarmItems';
 import StartEndDatePicker from '../components/StartEndDatePicker';
+import { useFocusEffect } from '@react-navigation/native';
 
 const manager = new BleManager();
 
 const GroupItemDetails = (props: any) => {
   const { farmData } = props.route?.params;
   const db = initializeSoilDb();
+  const [user, setUser] = useState({} as UserInterface);
   const [state, setState] = useState({
     isFarmLoading: false,
     openAddGroupModal: false,
@@ -85,13 +88,25 @@ const GroupItemDetails = (props: any) => {
 
   useEffect(() => {
     checkUsbSerial();
-  }, [props]);
-
-  useEffect(() => {
     getAllReportByFarmLists(state.filterByToDate);
     updateSampleCountByFarm();
   }, [props]);
 
+  // Refresh data on focus
+  useFocusEffect(
+    useCallback(() => {
+      getProfileDataFromLocalStorage();
+    }, [])
+  );
+
+  const getProfileDataFromLocalStorage = useCallback(async () => {
+    // fetch data and update state
+    const user = await getUserData();
+    if (user) {
+      setUser(user);
+    }
+  }, []);
+  
   const updateSampleCountByFarm = async () => {
     const farmReportLength = await fetchSamplesCountByFarm(
       db,
@@ -400,6 +415,7 @@ const GroupItemDetails = (props: any) => {
         <Statusbar />
         <VStack marginTop={10}>
           <Header
+            photoURL={user?.photoURL || ''}
             onProfile={() => {
               props.navigation.navigate('Profile');
             }}
@@ -502,28 +518,20 @@ const GroupItemDetails = (props: any) => {
                   state.allGraphReportData?.length > 0 ?
                     <View
                       flex={1}
+                      justifyContent={'center'}
                       height={323}
-                      width={323}
+                      width={345}
                       backgroundColor={COLORS.white}
-                      ml={10}
-                      mt={10}
+                      ml={2}
+                      mr={10}
                     //borderRadius={16}
                     >
-                      {/* <Text
-                  mb={2}
-                  fontSize={16}
-                  fontWeight={500}
-                  fontFamily={'Poppins-Regular'}
-                  color={COLORS.black}
-                  style={{ marginLeft: 5, paddingLeft: 5 }}
-                >
-                  {state.allInOneReportData.graphHeader}
-                </Text> */}
                       <BarChart
-                        horizontal
-                        width={260}
-                        height={260}
-                        barWidth={12}
+                       // horizontal
+                        //width={260}
+                        width={400}
+                       // height={260}
+                        barWidth={8}
                         //noOfSections={3}
                         barBorderRadius={4}
                         frontColor="lightgray"
@@ -531,7 +539,8 @@ const GroupItemDetails = (props: any) => {
                         yAxisThickness={0}
                         xAxisThickness={0}
                         labelWidth={50}
-                        xAxisLabelTextStyle={{ fontSize: 8, marginBottom: 25, marginTop: -10 }}
+                        //xAxisLabelTextStyle={{ fontSize: 8, marginBottom: 25, marginTop: -10 }}
+                        xAxisLabelTextStyle={{ fontSize: 8 }}
                       />
                     </View>
                     :
@@ -573,7 +582,7 @@ const GroupItemDetails = (props: any) => {
                                 // areaChart
                                 width={400}
                                 //height={280}
-                                barWidth={12}
+                                barWidth={8}
                                 //noOfSections={3}
                                 barBorderRadius={4}
                                 frontColor="lightgray"
