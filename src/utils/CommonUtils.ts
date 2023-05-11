@@ -4,7 +4,7 @@ import { UserInterface } from "./Interfaces";
 import moment from "moment";
 import { PermissionsAndroid, Platform } from "react-native";
 
-export const countryCode= +91;
+export const countryCode= '+91';
 export const UART_Baud_Rate= 115200;
 export const AsyncKey ={
   user: 'user',

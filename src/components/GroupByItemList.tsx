@@ -39,7 +39,7 @@ const GroupByItemList = (props: GroupListItemInterface) => {
                 alignSelf: 'center',
                 aspectRatio: 1,
                 flexDirection: 'row',
-                padding: 10,
+               // padding: 5,
             }}
 
         >
@@ -48,7 +48,7 @@ const GroupByItemList = (props: GroupListItemInterface) => {
                     justifyContent: 'center',
                     alignContent: 'center',
                     alignSelf: 'center',
-                    backgroundColor: '#FF02024A', width: 100, height: 94
+                    backgroundColor: '#FF02024A', width: 80, height: 54
                 }}
                 onPress={() => props?.onDeleteClick && props?.onDeleteClick()}
             >
@@ -63,7 +63,7 @@ const GroupByItemList = (props: GroupListItemInterface) => {
                     justifyContent: 'center',
                     alignContent: 'center',
                     alignSelf: 'center',
-                    backgroundColor: '#1BA6044A', width: 100, height: 94,
+                    backgroundColor: '#1BA6044A', width: 80, height: 54,
                 }}
                 onPress={() => {
                     props?.onEditClick && props?.onEditClick()
@@ -78,6 +78,37 @@ const GroupByItemList = (props: GroupListItemInterface) => {
         </SwipeButtonsContainer>
     );
 
+    const rightButton = (
+        <SwipeButtonsContainer
+            style={{
+                alignSelf: 'center',
+                aspectRatio: 1,
+                flexDirection: 'row',
+               // padding: 5,
+            }}
+
+        >
+           <TouchableOpacity
+                style={{
+                    justifyContent: 'center',
+                    alignContent: 'center',
+                    alignSelf: 'center',
+                    backgroundColor: '#1BA6044A', width: 80, height: 54,
+                }}
+                onPress={() => {
+                    onItemPlusClick && onItemPlusClick();
+                }}
+            >
+                <Image
+                    style={styles.leftIcon}
+                    source={IMAGES.PlusIcon}
+                    resizeMode="contain"
+                    tintColor={'green.500'}
+                />
+            </TouchableOpacity>
+        </SwipeButtonsContainer>
+    );
+
     return (
         <SwipeItem
             style={{
@@ -87,6 +118,7 @@ const GroupByItemList = (props: GroupListItemInterface) => {
             }}
             //swipeContainerStyle={styles.swipeContentContainerStyle}
             leftButtons={props?.isCollectingSamplePage ? undefined : (isSelectedFarmItem?.farm_id === item.farm_id) ? leftButton : undefined}
+            rightButtons={props?.isCollectingSamplePage ? undefined : (isSelectedFarmItem?.farm_id === item.farm_id) ? rightButton : undefined}
             disableSwipeIfNoButton
         >
             <Pressable

@@ -632,47 +632,54 @@ const GroupItemDetails = (props: any) => {
                     <Text color={COLORS.black_200}>No Samples Available</Text>
                   </View>
               }
-
-              <Button
-                text={'Save Record'}
-                style={{
-                  marginTop: 20,
-                  marginBottom: 20,
-                  width: 200,
-                  alignSelf: 'center',
-                }}
-                onPress={
-                  async () => {
-                    if (state.isConnectedBy === 'Bluetooth') {
-                      const isConnected = await manager.isDeviceConnected(
-                        state.connectedBleDevice.id
-                      );
-                      if (isConnected) {
-                        discoverServices(state.connectedBleDevice);
-                      } else {
-                        connectToDevice(state.connectedBleDevice);
-                      }
-                    } else if (state.isConnectedBy === 'USB') {
-                      if (Platform.OS === 'android') {
-                        const devices = await UsbSerialManager.list();
-                        if (devices?.length > 0) {
-                          connectUsbSerialPort(devices)
-                          // readAndWriteDataFromUsbSerial(
-                          //   state.connectedUsbDevice.deviceId
-                          // );
-                        } else {
-                          showToast('Please connect device')
-                        }
-                      }
-                    } else {
-                      showToast('Please connect device')
-                    }
-                  }
-                  // props.navigation.goBack();
-                }
-              />
             </VStack>
           </ScrollView>
+
+          <View justifyContent={'flex-end'}
+            alignContent={'flex-end'}
+            justifyItems={'flex-end'}
+            alignItems={'flex-end'}
+            flex={1}
+          >
+            <Button
+              text={'Save Record'}
+              style={{
+                marginTop: 20,
+                marginBottom: 20,
+                width: 200,
+                alignSelf: 'center',
+                backgroundColor: COLORS.brown_300,
+              }}
+              onPress={
+                async () => {
+                  if (state.isConnectedBy === 'Bluetooth') {
+                    const isConnected = await manager.isDeviceConnected(
+                      state.connectedBleDevice.id
+                    );
+                    if (isConnected) {
+                      discoverServices(state.connectedBleDevice);
+                    } else {
+                      connectToDevice(state.connectedBleDevice);
+                    }
+                  } else if (state.isConnectedBy === 'USB') {
+                    if (Platform.OS === 'android') {
+                      const devices = await UsbSerialManager.list();
+                      if (devices?.length > 0) {
+                        connectUsbSerialPort(devices)
+                        // readAndWriteDataFromUsbSerial(
+                        //   state.connectedUsbDevice.deviceId
+                        // );
+                      } else {
+                        showToast('Please connect device')
+                      }
+                    }
+                  } else {
+                    showToast('Please connect device')
+                  }
+                }
+              }
+            />
+          </View>
         </VStack>
         {state.openDatePicker &&
           <StartEndDatePicker
