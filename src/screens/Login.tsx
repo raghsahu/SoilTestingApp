@@ -2,7 +2,7 @@ import React, { useState} from 'react';
 //ASSETS
 import {COLORS} from '../assets';
 //PACKAGES
-import {StyleSheet,  View} from 'react-native';
+import {ActivityIndicator, StyleSheet,  View} from 'react-native';
 import { VStack, Text, } from 'native-base';
 import { Button, Statusbar, Input } from '../components';
 import { firebase } from '@react-native-firebase/auth';
@@ -10,12 +10,15 @@ import { countryCode, showToast } from '../utils/CommonUtils';
 
 const Login = (props: any) => {
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handlePhoneNumberSubmit = async () => {
+    setIsLoading(true);
     try {
       const phoneNumberWithCode = countryCode + phoneNumber; // Include country code
       const confirmation: any = await firebase.auth().signInWithPhoneNumber(phoneNumberWithCode);
      if(confirmation?._verificationId){
+       setIsLoading(false);
        props.navigation.navigate('Otp', {
         mobileNo: phoneNumberWithCode,
         verificationId: confirmation?._verificationId,
@@ -23,6 +26,8 @@ const Login = (props: any) => {
      }
     } catch (error) {
       console.log(error);
+      showToast('' + error)
+      setIsLoading(false);
     }
   };
 
@@ -63,6 +68,7 @@ const Login = (props: any) => {
                   />
               </VStack>
           </VStack>
+          {isLoading && <ActivityIndicator size="large" color={COLORS.brown_500} />}
     </View>
   );
 }
