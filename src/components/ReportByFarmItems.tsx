@@ -52,6 +52,7 @@ const ReportByFarmItemList = (props: ReportListItemInterface) => {
                 margin: 5,
                 //backgroundColor: getBgColors(item),
                 borderRadius: 8,
+                height: 115,
             }}
             //swipeContainerStyle={styles.swipeContentContainerStyle}
            // leftButtons={props?.isCollectingSamplePage ? undefined : (isSelectedFarmItem?.farm_id === item.farm_id) ? leftButton : undefined}
@@ -67,7 +68,7 @@ const ReportByFarmItemList = (props: ReportListItemInterface) => {
                 }}
             >
                 <HStack
-                    flex={1}
+                    //flex={1}
                 >
                     <CircleImageBackground
                         style={styles.profileImage}
@@ -138,8 +139,9 @@ const ReportByFarmItemList = (props: ReportListItemInterface) => {
                                 fontSize={12}
                                 color={getSubTextColors()}
                             >
-                                {props?.isCollectingSamplePage ? '1  Sample is collected' : item.sampleCount + ' Samples collected'}
+                                {props?.isCollectingSamplePage ? '1  Sample is collecting...' : item.sampleCount + ' Samples collected'}
                             </Text>
+                            {!props?.isCollectingSamplePage ?
                             <Text
                                 fontFamily={'Poppins-Regular'}
                                 fontStyle={'normal'}
@@ -151,6 +153,7 @@ const ReportByFarmItemList = (props: ReportListItemInterface) => {
                             >
                                 {''+ moment(new Date(item?.create_time)).fromNow()}
                             </Text>
+                            : <></>}
                         </HStack>
                     </VStack>
                 </HStack>

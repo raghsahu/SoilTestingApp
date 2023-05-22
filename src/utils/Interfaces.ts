@@ -59,6 +59,7 @@ export interface AddNewGroupModalInterface {
     visible: boolean,
     onClose: () => void,
     onSubmit: (text: string) => void,
+    closeAble: boolean;
 }
 
 export interface AddNewFarmModalInterface {

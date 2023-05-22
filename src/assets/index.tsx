@@ -14,6 +14,7 @@ export const IMAGES = {
     DeleteIcon: require('./images/delete.png'),
     EditIcon: require('./images/editIcon.png'),
     CalendarIcon: require('./images/calendar.png'),
+    RefreshIcon: require('./images/refreshIcon.png'),
 }
 
 export const COLORS = {

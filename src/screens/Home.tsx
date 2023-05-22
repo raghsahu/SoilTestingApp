@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   Alert,
   BackHandler,
+  Dimensions,
   Platform,
   StyleSheet,
   TouchableOpacity,
@@ -48,9 +49,11 @@ import { useFocusEffect } from '@react-navigation/native';
 import { GraphBarDataInterface, UserInterface } from '../utils/Interfaces';
 import { UsbSerialManager } from '../usbSerialModule';
 import StartEndDatePicker from '../components/StartEndDatePicker';
+import { SwiperFlatList } from 'react-native-swiper-flatlist';
 
 const Home = (props: any) => {
   const db = initializeSoilDb();
+  const { width } = Dimensions.get('window');
   const [user, setUser] = useState({} as UserInterface);
   const [state, setState] = useState({
     isFarmLoading: false,
@@ -69,19 +72,19 @@ const Home = (props: any) => {
     allInOneReportData: {} as GraphBarDataInterface,
     openDatePicker: false,
     isAllInOneGraphOpen: true,
+    isFirstGroupCreated: false,
   });
 
   useEffect(() => {
     const backAction = () => {
-      BackHandler.exitApp();
+      //BackHandler.exitApp();
+      props.navigation.goBack();
       return true;
     };
-
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       backAction
     );
-
     return () => backHandler.remove();
   }, []);
 
@@ -89,18 +92,6 @@ const Home = (props: any) => {
     getAllGroupLists();
     //getAllReportByDate(state.filterByToDate);
   }, [props]);
-
-  // useEffect(() => {
-  //   if (state.isSelectedGroup?.group_id) {
-  //     setState((prev) => {
-  //       return {
-  //         ...prev,
-  //         isFarmLoading: true,
-  //       };
-  //     });
-  //     fetchGroupByFarmList(state.isSelectedGroup?.group_id);
-  //   }
-  // }, [state.isSelectedGroup]);
 
   // Refresh data on focus
   useFocusEffect(
@@ -157,8 +148,20 @@ const Home = (props: any) => {
   }, []);
 
   const getAllGroupLists = async () => {
-    const allGroupRes = await fetchAllGroupData(db);
-    if (allGroupRes.length) {
+    const allGroupRes = await fetchAllGroupData(db)
+    .catch((err)=> {
+      if (state.groupTabList.length === 0) {
+        setState((prev) => {
+          return {
+            ...prev,
+            openAddGroupModal: true,
+            isFirstGroupCreated: true,
+          };
+        });
+      }
+    });
+
+    if (allGroupRes?.length) {
       setState((prev) => {
         return {
           ...prev,
@@ -168,15 +171,28 @@ const Home = (props: any) => {
           isSelectedGroup: state.isSelectedGroup?.group_id
             ? state.isSelectedGroup
             : allGroupRes[0],
+          openAddNewFarmModal: state.isFirstGroupCreated,
         };
       });
+
       fetchGroupByFarmList(state.isSelectedGroup?.group_id
         ? state.isSelectedGroup?.group_id
         : allGroupRes[0]?.group_id);
+    } else {
+      if (state.groupTabList.length === 0) {
+        setState((prev) => {
+          return {
+            ...prev,
+            openAddGroupModal: true,
+            isFirstGroupCreated: true,
+          };
+        });
+      }
     }
   };
 
   const fetchGroupByFarmList = async (group_id: number) => {
+    console.log('rrr333 ')
     const allFarmRes = await fetchAllGroupByFarmList(db, group_id);
     if (allFarmRes?.length) {
       setState((prev) => {
@@ -453,9 +469,9 @@ const Home = (props: any) => {
                     mt={5}
                     borderRadius={16}
                     flex={1}
-                    width={345}
+                    width={355}
                     ml={2}
-                    mr={10}
+                    mr={2}
                   >
                       <BarChart
                         //horizontal
@@ -479,12 +495,7 @@ const Home = (props: any) => {
                   </View>
                 :
                 state.allGraphReportData?.length > 0 ? (
-                  <ScrollView
-                    flex={1}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    style={styles.pagerView}
-                  >
+                  <SwiperFlatList index={0}>
                     {state.allGraphReportData?.map((item: any) => {
                       return (
                         <View
@@ -493,10 +504,10 @@ const Home = (props: any) => {
                           backgroundColor={COLORS.brown_400}
                           mt={5}
                           borderRadius={16}
-                          flex={1}
-                          width={345}
+                          //flex={1}
+                          width={355}
                           ml={2}
-                          mr={10}
+                          mr={2}
                         >
                           <Text
                             mb={2}
@@ -516,13 +527,14 @@ const Home = (props: any) => {
                             data={item.graphData}
                             yAxisThickness={0}
                             xAxisThickness={0}
-                            labelWidth={50}
-                            xAxisLabelTextStyle={{ fontSize: 8 }}
+                            labelWidth={60}
+                            width={305}
+                            xAxisLabelTextStyle={{ fontSize: 10 }}
                           />
                         </View>
                       );
                     })}
-                  </ScrollView>
+                  </SwiperFlatList>
                 ) : (
                   <View
                     height={323}
@@ -698,6 +710,7 @@ const Home = (props: any) => {
       {state.openAddGroupModal && (
         <AddNewGroupModal
           visible={state.openAddGroupModal}
+          closeAble={state.groupTabList.length !== 0 ? true : false}
           onClose={() => {
             setState((prev) => {
               return {
@@ -748,6 +761,7 @@ const Home = (props: any) => {
                 openAddNewFarmModal: false,
                 isEditFarm: false,
                 isSelectedFarmItem: {} as CreateFarmsItems,
+                isFirstGroupCreated: false,
               };
             });
           }}
@@ -758,6 +772,12 @@ const Home = (props: any) => {
             image?: string
           ) => {
             addNewFarm(farmName, farmField, isEditFarm, image);
+            setState((prev) => {
+              return {
+                ...prev,
+                isFirstGroupCreated: false,
+              };
+            });
           }}
         />
       )}

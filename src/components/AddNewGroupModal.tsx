@@ -5,7 +5,7 @@ import { showToast } from "../utils/CommonUtils";
 import Button from "./Button";
 import { addNewGroupStyles } from "./CommonStyle";
 import Input from "./Input";
-import { AddNewGroupModalInterface } from "./interface";
+import { AddNewGroupModalInterface } from "../utils/Interfaces";
 
 const AddNewGroupModal = (props: AddNewGroupModalInterface) => {
     const [newGroupName, setNewGroup] = useState('');
@@ -15,12 +15,12 @@ const AddNewGroupModal = (props: AddNewGroupModalInterface) => {
             transparent={true}
             animationType='fade'
             visible={props.visible}
-            onRequestClose={() => { props.onClose() }}
+            onRequestClose={() => { props.closeAble && props.onClose() }}
         >
             <TouchableOpacity
                 style={addNewGroupStyles.container}
                 activeOpacity={1}
-                onPressOut={() => { props.onClose() }}
+                //onPressOut={() => { props.onClose() }}
             >
                 <View style={[addNewGroupStyles.viewWrapper]}>
                     <View style={addNewGroupStyles.modal}>
@@ -28,7 +28,7 @@ const AddNewGroupModal = (props: AddNewGroupModalInterface) => {
                             style={addNewGroupStyles.inputView}
                             placeholder={'Add Group Name Here'}
                             inputText={''}
-                            onChangeText={text => {
+                            onChangeText={(text: any) => {
                                 setNewGroup(text)
                             }}
                         />

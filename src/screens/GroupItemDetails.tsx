@@ -5,13 +5,14 @@ import { COLORS, IMAGES } from '../assets';
 import {
   ActivityIndicator,
   BackHandler,
+  Dimensions,
   PermissionsAndroid,
   Platform,
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
 //import { RNText } from '../components';
-import { VStack, Text, View, HStack, Image, ScrollView } from 'native-base';
+import { VStack, Text, View, HStack, Image, ScrollView, FlatList } from 'native-base';
 import { Button, Statusbar, Input, Header, GroupTabItem, DateTimePicker } from '../components';
 import { BarChart, LineChart } from 'react-native-gifted-charts';
 import { getGraphReportData, getSelectedGraphReportData } from '../utils/GraphData';
@@ -46,6 +47,7 @@ import {
 import ReportByFarmItemList from '../components/ReportByFarmItems';
 import StartEndDatePicker from '../components/StartEndDatePicker';
 import { useFocusEffect } from '@react-navigation/native';
+import SwiperFlatList from 'react-native-swiper-flatlist';
 
 const manager = new BleManager();
 
@@ -68,6 +70,7 @@ const GroupItemDetails = (props: any) => {
     filterByFromDate: '',
     openDatePicker: false,
     isAllInOneGraphOpen: true,
+    readingTempData: null as any,
   });
   const [allNotifyData, setAllNotifyData] = useState([] as string[]);
   const deviceName = 'SS_7IN1';
@@ -88,8 +91,10 @@ const GroupItemDetails = (props: any) => {
 
   useEffect(() => {
     checkUsbSerial();
-    getAllReportByFarmLists(state.filterByToDate);
     updateSampleCountByFarm();
+    setTimeout(()=> {
+      getAllReportByFarmLists(state.filterByToDate);
+    }, 3000)
   }, [props]);
 
   // Refresh data on focus
@@ -147,7 +152,7 @@ const GroupItemDetails = (props: any) => {
       setState((prev) => {
         return {
           ...prev,
-          reportByFarmList: allReportRes,
+          reportByFarmList: allReportRes.reverse(),
           allGraphReportData: allGraphReportData.allSeparateGraph,
           allInOneReportData: allGraphReportData.allInOneGraph,
           isFarmLoading: false,
@@ -317,6 +322,12 @@ const GroupItemDetails = (props: any) => {
   };
 
   const discoverServices = async (device: Device) => {
+    setState((prev) => {
+      return {
+        ...prev,
+        isFarmLoading: true,
+      };
+    });
     try {
       await device.discoverAllServicesAndCharacteristics();
       const services = await device.services();
@@ -374,22 +385,39 @@ const GroupItemDetails = (props: any) => {
     console.log('rrr346u88 ', JSON.stringify(uniqueArray))
     const allValuesAre = await getSeparatedValues(uniqueArray);
     console.log('rrr22332 ', JSON.stringify(allValuesAre))
-    storeDatailInDb(allValuesAre);
-  }, []);
-
-  const storeDatailInDb = async (allValuesAre: any) => {
-    delete allValuesAre.update_time;
     const newItem = {
       ...farmData,
       ...allValuesAre,
       create_time: new Date(),
+      sampleCount: 1,
     } as ReportByFarmItems;
+    const allGraphReportData = await getGraphReportData([newItem]);
+    setState((prev) => {
+      return {
+        ...prev,
+        readingTempData: newItem,
+       // reportByFarmList: [...[newItem], ...state.reportByFarmList],
+        allGraphReportData: allGraphReportData.allSeparateGraph,
+        allInOneReportData: allGraphReportData.allInOneGraph,
+        isFarmLoading: false,
+      };
+    });
+  }, []);
 
-    const saveFarmReportRes = await saveReportByFarm(db, newItem);
+  const storeDetailInDb = async (readingTempData: any) => {
+    delete readingTempData.update_time;
+    const saveFarmReportRes = await saveReportByFarm(db, readingTempData);
     if (saveFarmReportRes?.ok) {
       showToast('Farm report saved successfully');
       updateSampleCountByFarm();
       getAllReportByFarmLists(state.filterByToDate, state.filterByFromDate);
+
+      setState((prev) => {
+        return {
+          ...prev,
+          readingTempData: null,
+        };
+      });
     }
   };
 
@@ -409,9 +437,36 @@ const GroupItemDetails = (props: any) => {
     }
   };
 
+  const refreshReadingData = async () => {
+    if (state.isConnectedBy === 'Bluetooth') {
+      const isConnected = await manager.isDeviceConnected(
+        state.connectedBleDevice.id
+      );
+      if (isConnected) {
+        discoverServices(state.connectedBleDevice);
+      } else {
+        connectToDevice(state.connectedBleDevice);
+      }
+    } else if (state.isConnectedBy === 'USB') {
+      if (Platform.OS === 'android') {
+        const devices = await UsbSerialManager.list();
+        if (devices?.length > 0) {
+          connectUsbSerialPort(devices)
+          // readAndWriteDataFromUsbSerial(
+          //   state.connectedUsbDevice.deviceId
+          // );
+        } else {
+          showToast('Please connect device')
+        }
+      }
+    } else {
+      showToast('Please connect device')
+    }
+  }
+
   return (
     <>
-      <View style={styles.container}>
+      <VStack style={styles.container}>
         <Statusbar />
         <VStack marginTop={10}>
           <Header
@@ -423,14 +478,15 @@ const GroupItemDetails = (props: any) => {
               //props.navigation.navigate('Login');
             }}
           ></Header>
-          <ScrollView marginTop={30} showsVerticalScrollIndicator={false}>
+          
             <VStack marginLeft={5} marginRight={5}>
               <HStack
-                marginTop={5}
+                marginTop={8}
                 width={'100%'}
                 justifyContent={'space-between'}
                 alignContent={'center'}
               >
+              <HStack>
                 <VStack>
                   <Text
                     fontSize={16}
@@ -455,6 +511,21 @@ const GroupItemDetails = (props: any) => {
                     {farmData.group_name + ' - ' + farmData.farm_field}
                   </Text>
                 </VStack>
+                <TouchableOpacity
+                    style={{ justifyContent: 'center', alignItems: 'center', marginLeft: 5 }}
+                    onPress={() => {
+                      refreshReadingData();
+                    }}
+                  >
+                    <Image
+                      style={{  height: 24,
+                        width: 24,
+                        alignSelf: 'center',}}
+                      source={IMAGES.RefreshIcon}
+                      resizeMode="contain"
+                    />
+                  </TouchableOpacity>
+                </HStack>
                 <HStack>
                   <TouchableOpacity
                     style={{ justifyContent: 'center', alignItems: 'center' }}
@@ -517,19 +588,19 @@ const GroupItemDetails = (props: any) => {
                 state.isAllInOneGraphOpen ?
                   state.allGraphReportData?.length > 0 ?
                     <View
-                      flex={1}
+                     // flex={1}
                       justifyContent={'center'}
                       height={323}
-                      width={345}
+                      width={355}
                       backgroundColor={COLORS.white}
                       ml={2}
-                      mr={10}
+                      mr={2}
                     //borderRadius={16}
                     >
                       <BarChart
                        // horizontal
                         //width={260}
-                        width={400}
+                        width={305}
                        // height={260}
                         barWidth={8}
                         //noOfSections={3}
@@ -538,9 +609,9 @@ const GroupItemDetails = (props: any) => {
                         data={state.allInOneReportData.graphData}
                         yAxisThickness={0}
                         xAxisThickness={0}
-                        labelWidth={50}
+                        labelWidth={60}
                         //xAxisLabelTextStyle={{ fontSize: 8, marginBottom: 25, marginTop: -10 }}
-                        xAxisLabelTextStyle={{ fontSize: 8 }}
+                        xAxisLabelTextStyle={{ fontSize: 10 }}
                       />
                     </View>
                     :
@@ -549,23 +620,18 @@ const GroupItemDetails = (props: any) => {
                     </View>
                   :
                   state.allGraphReportData?.length > 0 ?
-                    <ScrollView
-                      flex={1}
-                      horizontal
-                      showsHorizontalScrollIndicator={false}
-                      style={styles.pagerView}
-                    >
+                  <SwiperFlatList index={0}>
                       {
                         state.allGraphReportData?.map((item: any) => {
                           return (
                             <View
-                              flex={1}
+                              //flex={1}
                               justifyContent={'center'}
                               height={323}
-                              width={345}
+                              width={355}
                               backgroundColor={COLORS.white}
                               ml={2}
-                              mr={10}
+                              mr={2}
                               borderRadius={16}
                             >
                               <Text
@@ -580,7 +646,7 @@ const GroupItemDetails = (props: any) => {
                               </Text>
                               <BarChart
                                 // areaChart
-                                width={400}
+                                width={305}
                                 //height={280}
                                 barWidth={8}
                                 //noOfSections={3}
@@ -589,14 +655,14 @@ const GroupItemDetails = (props: any) => {
                                 data={item.graphData}
                                 yAxisThickness={0}
                                 xAxisThickness={0}
-                                labelWidth={50}
-                                xAxisLabelTextStyle={{ fontSize: 8 }}
+                                labelWidth={60}
+                                xAxisLabelTextStyle={{ fontSize: 10 }}
                               />
                             </View>
                           );
                         })
                       }
-                    </ScrollView>
+                    </SwiperFlatList>
                     : <View height={323} justifyContent={'center'} alignItems={'center'}>
                       <Text color={COLORS.black_200}>No Reports Available</Text>
                     </View>
@@ -606,13 +672,23 @@ const GroupItemDetails = (props: any) => {
                 <View justifyContent={'center'} alignItems={'center'}>
                   <ActivityIndicator size="large" color={COLORS.brown_500} />
                 </View>
-                : state.reportByFarmList?.length > 0 ? (
-                  <View overflow={'scroll'}>
-                    {state.reportByFarmList.map((item: ReportByFarmItems) => {
+                : 
+                state.readingTempData !== null ?
+                      <ReportByFarmItemList
+                          item={state.readingTempData}
+                          isCollectingSamplePage={true}
+                          isSelectedFarmItem={state.isSelectedFarmItem}
+                        />
+                :
+                state.reportByFarmList?.length > 0 ? (
+                  <View height={380}>
+                  <FlatList
+                    data={state.reportByFarmList}
+                    renderItem={({item}) => {
                       return (
                         <ReportByFarmItemList
                           item={item}
-                          isCollectingSamplePage={true}
+                          isCollectingSamplePage={false}
                           isSelectedFarmItem={state.isSelectedFarmItem}
                           onItemClick={() => {
                             setState((prev) => {
@@ -624,8 +700,10 @@ const GroupItemDetails = (props: any) => {
                             setSelectedGraphData(item);
                           }}
                         />
-                      );
-                    })}
+                      )
+                    }}
+                    keyExtractor={(item, index) => index + item.farm_id + ''}
+                  />
                   </View>
                 ) :
                   <View mt={10} justifyContent={'center'} alignItems={'center'}>
@@ -633,54 +711,35 @@ const GroupItemDetails = (props: any) => {
                   </View>
               }
             </VStack>
-          </ScrollView>
 
-          <View justifyContent={'flex-end'}
-            alignContent={'flex-end'}
-            justifyItems={'flex-end'}
-            alignItems={'flex-end'}
+          <View
             flex={1}
+            mb={10}
+            mt={Dimensions.get('window').height - 100}
+            position={'absolute'}
+            width={'100%'}
           >
             <Button
               text={'Save Record'}
               style={{
-                marginTop: 20,
-                marginBottom: 20,
-                width: 200,
+                width: 180,
                 alignSelf: 'center',
                 backgroundColor: COLORS.brown_300,
               }}
               onPress={
                 async () => {
-                  if (state.isConnectedBy === 'Bluetooth') {
-                    const isConnected = await manager.isDeviceConnected(
-                      state.connectedBleDevice.id
-                    );
-                    if (isConnected) {
-                      discoverServices(state.connectedBleDevice);
-                    } else {
-                      connectToDevice(state.connectedBleDevice);
-                    }
-                  } else if (state.isConnectedBy === 'USB') {
-                    if (Platform.OS === 'android') {
-                      const devices = await UsbSerialManager.list();
-                      if (devices?.length > 0) {
-                        connectUsbSerialPort(devices)
-                        // readAndWriteDataFromUsbSerial(
-                        //   state.connectedUsbDevice.deviceId
-                        // );
-                      } else {
-                        showToast('Please connect device')
-                      }
-                    }
+                  if (state.readingTempData !== null) {
+                    storeDetailInDb(state.readingTempData);
                   } else {
-                    showToast('Please connect device')
+                    showToast('Reading data not found')
                   }
                 }
               }
             />
           </View>
+          
         </VStack>
+  
         {state.openDatePicker &&
           <StartEndDatePicker
             visible={state.openDatePicker}
@@ -706,7 +765,7 @@ const GroupItemDetails = (props: any) => {
             }}
           />
         }
-      </View>
+      </VStack>
     </>
   );
 };
