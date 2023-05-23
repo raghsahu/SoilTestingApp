@@ -46,10 +46,11 @@ import {
 } from '../database/SoilAppDB';
 import { CreateFarmsItems, CreateGroupItems } from '../database/Interfaces';
 import { useFocusEffect } from '@react-navigation/native';
-import { GraphBarDataInterface, UserInterface } from '../utils/Interfaces';
+import { GraphBarDataInterface, GraphSingleData, UserInterface } from '../utils/Interfaces';
 import { UsbSerialManager } from '../usbSerialModule';
 import StartEndDatePicker from '../components/StartEndDatePicker';
 import { SwiperFlatList } from 'react-native-swiper-flatlist';
+import PercentageBar from '../components/PercentageBar';
 
 const Home = (props: any) => {
   const db = initializeSoilDb();
@@ -473,21 +474,17 @@ const Home = (props: any) => {
                     ml={2}
                     mr={2}
                   >
-                      <BarChart
-                        //horizontal
-                       // width={260}
-                        //height={260}
-                        barWidth={8}
-                        //noOfSections={3}
-                        barBorderRadius={4}
-                        frontColor="lightgray"
-                        data={state.allInOneReportData.graphData}
-                        yAxisThickness={0}
-                        xAxisThickness={0}
-                        labelWidth={50}
-                        //xAxisLabelTextStyle={{ fontSize: 8, marginBottom: 25, marginTop: -10 }}
-                        xAxisLabelTextStyle={{ fontSize: 8 }}
-                      />
+                    {state.allInOneReportData.graphData?.map((item: GraphSingleData) => {
+                      return (
+                          <PercentageBar
+                            height={8}
+                            backgroundColor={COLORS.brown_200}
+                            completedColor={COLORS.brown_300}
+                            percentage={'65%'}
+                            item={item}
+                          />
+                        );
+                      })}
                   </View>
                   :
                   <View height={323} justifyContent={'center'} alignItems={'center'}>

@@ -34,7 +34,7 @@ import {
 } from '../utils/CommonUtils';
 import { BleManager, Characteristic, Device } from 'react-native-ble-plx';
 import { Codes, Parity, UsbSerialManager } from '../usbSerialModule';
-import { ATCommandInterface, GraphBarDataInterface, USBDeviceInterface, UserInterface } from '../utils/Interfaces';
+import { ATCommandInterface, GraphBarDataInterface, GraphSingleData, USBDeviceInterface, UserInterface } from '../utils/Interfaces';
 import { ALL_AT_COMMANDS } from '../utils/Ble_UART_At_Command';
 import { CreateFarmsItems, ReportByFarmItems } from '../database/Interfaces';
 import {
@@ -48,6 +48,7 @@ import ReportByFarmItemList from '../components/ReportByFarmItems';
 import StartEndDatePicker from '../components/StartEndDatePicker';
 import { useFocusEffect } from '@react-navigation/native';
 import SwiperFlatList from 'react-native-swiper-flatlist';
+import PercentageBar from '../components/PercentageBar';
 
 const manager = new BleManager();
 
@@ -588,31 +589,25 @@ const GroupItemDetails = (props: any) => {
                 state.isAllInOneGraphOpen ?
                   state.allGraphReportData?.length > 0 ?
                     <View
-                     // flex={1}
                       justifyContent={'center'}
                       height={323}
                       width={355}
                       backgroundColor={COLORS.white}
                       ml={2}
                       mr={2}
-                    //borderRadius={16}
                     >
-                      <BarChart
-                       // horizontal
-                        //width={260}
-                        width={305}
-                       // height={260}
-                        barWidth={8}
-                        //noOfSections={3}
-                        barBorderRadius={4}
-                        frontColor="lightgray"
-                        data={state.allInOneReportData.graphData}
-                        yAxisThickness={0}
-                        xAxisThickness={0}
-                        labelWidth={60}
-                        //xAxisLabelTextStyle={{ fontSize: 8, marginBottom: 25, marginTop: -10 }}
-                        xAxisLabelTextStyle={{ fontSize: 10 }}
-                      />
+                    {state.allInOneReportData.graphData?.map((item: GraphSingleData) => {
+                      return (
+                        <PercentageBar
+                          height={8}
+                          backgroundColor={COLORS.brown_200}
+                          completedColor={COLORS.brown_300}
+                          labelColor={COLORS.black_300}
+                          percentage={'65%'}
+                          item={item}
+                        />
+                      );
+                    })}
                     </View>
                     :
                     <View height={323} justifyContent={'center'} alignItems={'center'}>

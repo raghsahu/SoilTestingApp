@@ -29,6 +29,7 @@ export const COLORS = {
     textColor: '#606060',
     subTextColor: '#9C9C9C',
     borderColor: '#DEDEDE',
+    brown_200: '#A3938A',
     brown_400: '#5E4433',
     brown_300: '#786254',
     brown_500: '#361500',
