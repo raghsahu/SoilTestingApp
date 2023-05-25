@@ -3,6 +3,7 @@
 
 import { ATCommandInterface } from "./Interfaces";
 
+export const deviceName = 'SS_7IN1';
 // AT	OK	-	Represent at commands are working
 // AT+TEMP?	AT+TEMP=27.6	℃	Returns temperature in ℃
 // AT+MOIS?	AT+MOIS=5	%RH	Returns relative humidity
@@ -20,6 +21,7 @@ export const ALL_AT_COMMANDS = [
     {
         command: 'AT+TEMP?',
         inResInclude: 'TEMP=',
+
     },
     {
         command: 'AT+MOIS?',
@@ -32,6 +34,7 @@ export const ALL_AT_COMMANDS = [
     {
         command: 'AT+NITROGEN?',
         inResInclude: 'NITROGEN=',
+
     },
     {
         command: 'AT+COND?',
@@ -46,3 +49,34 @@ export const ALL_AT_COMMANDS = [
         inResInclude: 'POTASSIUM=',
     }
 ] as ATCommandInterface[];
+
+export const AllCommandMaxValueRes = {
+    temp: {
+        key: 'Temp',
+        maxValue: 60,
+    },
+    mois: {
+        key: 'Humidity',
+        maxValue: 100,
+    },
+    ph: {
+        key: 'PH',
+        maxValue: 10,
+    },
+    nitrogen: {
+        key: 'N',
+        maxValue: 200,
+    },
+    cond: {
+        key: 'EC',
+        maxValue: 20,
+    },
+    phosphorus: {
+        key: 'P',
+        maxValue: 100,
+    },
+    potassium: {
+        key: 'K',
+        maxValue: 200,
+    },
+}

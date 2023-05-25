@@ -6,17 +6,14 @@ import {
   ActivityIndicator,
   BackHandler,
   Dimensions,
-  PermissionsAndroid,
   Platform,
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
-//import { RNText } from '../components';
-import { VStack, Text, View, HStack, Image, ScrollView, FlatList } from 'native-base';
-import { Button, Statusbar, Input, Header, GroupTabItem, DateTimePicker } from '../components';
-import { BarChart, LineChart } from 'react-native-gifted-charts';
+import { VStack, Text, View, HStack, Image, FlatList } from 'native-base';
+import { Button, Statusbar, Header } from '../components';
+import { BarChart } from 'react-native-gifted-charts';
 import { getGraphReportData, getSelectedGraphReportData } from '../utils/GraphData';
-import GroupByItemList from '../components/GroupByItemList';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
@@ -35,7 +32,7 @@ import {
 import { BleManager, Characteristic, Device } from 'react-native-ble-plx';
 import { Codes, Parity, UsbSerialManager } from '../usbSerialModule';
 import { ATCommandInterface, GraphBarDataInterface, GraphSingleData, USBDeviceInterface, UserInterface } from '../utils/Interfaces';
-import { ALL_AT_COMMANDS } from '../utils/Ble_UART_At_Command';
+import { ALL_AT_COMMANDS, deviceName } from '../utils/Ble_UART_At_Command';
 import { CreateFarmsItems, ReportByFarmItems } from '../database/Interfaces';
 import {
   fetchAllReportDataByFarm,
@@ -73,8 +70,6 @@ const GroupItemDetails = (props: any) => {
     isAllInOneGraphOpen: true,
     readingTempData: null as any,
   });
-  const [allNotifyData, setAllNotifyData] = useState([] as string[]);
-  const deviceName = 'SS_7IN1';
 
   useEffect(() => {
     const backAction = () => {
@@ -94,7 +89,7 @@ const GroupItemDetails = (props: any) => {
     checkUsbSerial();
     updateSampleCountByFarm();
     setTimeout(()=> {
-      getAllReportByFarmLists(state.filterByToDate);
+      getAllReportByFarmLists(state.filterByToDate, state.filterByFromDate);
     }, 3000)
   }, [props]);
 
@@ -177,21 +172,13 @@ const GroupItemDetails = (props: any) => {
       return {
         ...prev,
         allGraphReportData: allGraphReportData,
+        allInOneReportData: {} as GraphBarDataInterface,
       };
     });
   }
 
   const checkUsbSerial = async () => {
-    // if (Platform.OS === 'android') {
-    //   const devices = await UsbSerialManager.list();
-    //   if (devices?.length > 0) {
-    //     connectUsbSerialPort(devices);
-    //   } else {
-    //     checkBleSerial();
-    //   }
-    // } else {
       checkBleSerial();
-    //}
   };
 
   const checkBleSerial = async () => {
@@ -204,6 +191,8 @@ const GroupItemDetails = (props: any) => {
           const devices = await UsbSerialManager.list();
           if (devices?.length > 0) {
             connectUsbSerialPort(devices);
+          } else {
+            showToast('Please check bluetooth or USB device')
           }
         }
       }
@@ -275,7 +264,7 @@ const GroupItemDetails = (props: any) => {
   }, []);
 
   const scanForDevices = () => {
-    manager.startDeviceScan(null, null, (error, device) => {
+    manager.startDeviceScan(null, null, async (error, device) => {
       if (error) {
         console.log(error);
         return;
@@ -290,6 +279,15 @@ const GroupItemDetails = (props: any) => {
           };
         });
         connectToDevice(device);
+      } else {
+        if (Platform.OS === 'android') {
+          const devices = await UsbSerialManager.list();
+          if (devices?.length > 0) {
+            connectUsbSerialPort(devices);
+          } else {
+            showToast('Please check bluetooth or USB device')
+          }
+        }
       }
     });
     setTimeout(() => {
@@ -304,7 +302,6 @@ const GroupItemDetails = (props: any) => {
       if (isAlreadyConnected) {
         await manager.cancelDeviceConnection(device.id);
       }
-      //else{
       const connectedDevice = await manager.connectToDevice(device.id);
       setState((prev) => {
         return {
@@ -315,9 +312,8 @@ const GroupItemDetails = (props: any) => {
       });
       console.log(`Connected to device: ${device.name} (${device.id})`);
       discoverServices(connectedDevice);
-      // }
     } catch (error) {
-      console.log(`Error connecting to device: ${device.name} (${device.id})`);
+      showToast(`Error connecting to device: ${device.name}`)
       console.log(error);
     }
   };
@@ -453,9 +449,6 @@ const GroupItemDetails = (props: any) => {
         const devices = await UsbSerialManager.list();
         if (devices?.length > 0) {
           connectUsbSerialPort(devices)
-          // readAndWriteDataFromUsbSerial(
-          //   state.connectedUsbDevice.deviceId
-          // );
         } else {
           showToast('Please connect device')
         }
@@ -478,6 +471,12 @@ const GroupItemDetails = (props: any) => {
             onSettings={() => {
               //props.navigation.navigate('Login');
             }}
+            onHeaderLabelClick={() => {
+              checkUsbSerial();
+            }}
+            label={state.connectedBleDevice?.name ? 'Device: ' + state.connectedBleDevice?.name :
+              state.connectedUsbDevice?.deviceId ? 'Device Id: ' + state.connectedUsbDevice?.deviceId :
+                'No Device Connected'}
           ></Header>
           
             <VStack marginLeft={5} marginRight={5}>
@@ -509,7 +508,7 @@ const GroupItemDetails = (props: any) => {
                       justifyContent: 'center',
                     }}
                   >
-                    {farmData.group_name + ' - ' + farmData.farm_field}
+                    {farmData.group_name + ' - ' + farmData.farm_name}
                   </Text>
                 </VStack>
                 <TouchableOpacity
@@ -603,7 +602,6 @@ const GroupItemDetails = (props: any) => {
                           backgroundColor={COLORS.brown_200}
                           completedColor={COLORS.brown_300}
                           labelColor={COLORS.black_300}
-                          percentage={'65%'}
                           item={item}
                         />
                       );

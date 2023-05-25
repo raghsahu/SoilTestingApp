@@ -15,7 +15,7 @@ const Header = (props: HeaderInterface) => {
         <TouchableOpacity style={styles.backContainer} onPress={props.onProfile}>
           <Image
             style={styles.menu}
-            source={props?.photoURL?.length ? { uri: props?.photoURL} : IMAGES.ProfileIcon}
+            source={props?.photoURL?.length ? { uri: props?.photoURL } : IMAGES.ProfileIcon}
             resizeMode="contain"
           />
         </TouchableOpacity>
@@ -30,23 +30,27 @@ const Header = (props: HeaderInterface) => {
         </TouchableOpacity>
       )}
 
-      <View justifyContent={'center'} alignContent={'center'} flex={1}>
-        <Text
-          fontFamily={'Poppins-Regular'}
-          height={100}
-          fontStyle={'normal'}
-          marginTop={20}
-          fontWeight={500}
-          fontSize={22}
-          color={COLORS.black_300}
-          alignSelf={'center'}
-          textAlign={'center'}>
-          {props?.label}
-        </Text>
-      </View>
+      <TouchableOpacity 
+      style={[{ justifyContent: 'center', alignContent: 'center', flex: 1 }]}
+        onPress={props.onHeaderLabelClick}
+      >
+          <Text
+            fontFamily={'Poppins-Regular'}
+            height={100}
+            fontStyle={'normal'}
+            marginTop={20}
+            fontWeight={500}
+            fontSize={16}
+            color={COLORS.black_300}
+            alignSelf={'center'}
+            textAlign={'center'}>
+            {props?.label}
+          </Text>
+      </TouchableOpacity>
 
       {props.onSettings && (
-        <TouchableOpacity style={[styles.backContainer, { justifyContent: 'flex-end' }]} onPress={props.onSettings}>
+        <TouchableOpacity style={[styles.backContainer, { justifyContent: 'flex-end' }]} 
+        onPress={props.onSettings}>
           <Image
             style={styles.settings}
             source={IMAGES.SettingsIcon}

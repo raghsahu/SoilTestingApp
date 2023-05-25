@@ -51,6 +51,7 @@ export interface HeaderInterface {
     onSettings?: () => void,
     onBack?: () => void,
     onProfile?: () => void,
+    onHeaderLabelClick?: () => void,
     photoURL?: string,
 }
 
@@ -121,4 +122,5 @@ export interface GraphBarDataInterface {
 export interface GraphSingleData {
     value: number,
     label: string,
+    maxValue?: number,
 }

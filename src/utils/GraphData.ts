@@ -1,5 +1,6 @@
 import { COLORS } from "../assets";
 import { ReportByFarmItems } from "../database/Interfaces";
+import { AllCommandMaxValueRes } from "./Ble_UART_At_Command";
 import { getTime } from "./CommonUtils";
 import { GraphBarDataInterface, GraphGroupDataInterface, GraphSingleData } from "./Interfaces";
 
@@ -22,40 +23,41 @@ export const getGraphReportData = async (allReportRes: ReportByFarmItems[])=> {
 
    const tempGraphData = {
     graphHeader: 'Temperature Report',
-    key: 'Temp',
+    key: AllCommandMaxValueRes.temp.key,
     graphData: [] as GraphSingleData[],
    }
    const phGraphData = {
     graphHeader: 'PH Report',
-    key: 'PH',
+    key: AllCommandMaxValueRes.ph.key,
     graphData: [] as GraphSingleData[],
    }
    //cond report
    const ecGraphData = {
     graphHeader: 'EC Report',
-    key: 'EC',
+    key: AllCommandMaxValueRes.cond.key,
     graphData: [] as GraphSingleData[],
    }
    const nGraphData = {
     graphHeader: 'N Report',
-    key: 'N',
+    key: AllCommandMaxValueRes.nitrogen.key,
     graphData: [] as GraphSingleData[],
    }
+   //phosphorus
    const pGraphData = {
     graphHeader: 'P Report',
-    key: 'P',
+    key: AllCommandMaxValueRes.phosphorus.key,
     graphData: [] as GraphSingleData[],
    }
    //POTASSIUM
    const kGraphData = {
     graphHeader: 'K Report',
-    key: 'K',
+    key: AllCommandMaxValueRes.potassium.key,
     graphData: [] as GraphSingleData[],
    }
    //MOIS
    const humidityGraphData = {
     graphHeader: 'Humidity Report',
-    key: 'Humidity',
+    key: AllCommandMaxValueRes.mois.key,
     graphData: [] as GraphSingleData[],
    }
 
@@ -132,72 +134,79 @@ export const convertAllInOneGraphData = (graphAllBarData: GraphBarDataInterface[
     } as GraphBarDataInterface;
 
     graphAllBarData.map((item: any)=> {
-          if (item.key ==='Temp') {
+          if (item.key ===AllCommandMaxValueRes.temp.key) {
             const sum = item.graphData.reduce(function(prev: any, current: any) {
                 return prev  +current.value
               }, 0);
             const tempData = {
                 value: sum/item.graphData?.length || 0,
-                label: item.key
+                label: item.key,
+                maxValue: AllCommandMaxValueRes.temp.maxValue,
             }
             averageGraphData.graphData.push(tempData)
-        } if (item.key ==='EC') {
+        } if (item.key === AllCommandMaxValueRes.cond.key) {
             const sum = item.graphData.reduce(function(prev: any, current: any) {
                 return prev  +current.value
               }, 0);
             const tempData = {
                 value: sum/item.graphData?.length || 0,
-                label: item.key
-            }
-            averageGraphData.graphData.push(tempData)
-        }
-         if (item.key ==='PH') {
-            const sum = item.graphData.reduce(function(prev: any, current: any) {
-                return prev  +current.value
-              }, 0);
-            const tempData = {
-                value: sum/item.graphData?.length || 0,
-                label: item.key
+                label: item.key,
+                maxValue: AllCommandMaxValueRes.cond.maxValue,
             }
             averageGraphData.graphData.push(tempData)
         }
-         if (item.key ==='N') {
+         if (item.key === AllCommandMaxValueRes.ph.key) {
             const sum = item.graphData.reduce(function(prev: any, current: any) {
                 return prev  +current.value
               }, 0);
             const tempData = {
                 value: sum/item.graphData?.length || 0,
-                label: item.key
+                label: item.key,
+                maxValue: AllCommandMaxValueRes.ph.maxValue,
             }
             averageGraphData.graphData.push(tempData)
         }
-         if (item.key ==='P') {
+         if (item.key === AllCommandMaxValueRes.nitrogen.key) {
             const sum = item.graphData.reduce(function(prev: any, current: any) {
                 return prev  +current.value
               }, 0);
             const tempData = {
                 value: sum/item.graphData?.length || 0,
-                label: item.key
+                label: item.key,
+                maxValue: AllCommandMaxValueRes.nitrogen.maxValue,
             }
             averageGraphData.graphData.push(tempData)
         }
-         if (item.key ==='K') {
+         if (item.key === AllCommandMaxValueRes.phosphorus.key) {
             const sum = item.graphData.reduce(function(prev: any, current: any) {
                 return prev  +current.value
               }, 0);
             const tempData = {
                 value: sum/item.graphData?.length || 0,
-                label: item.key
+                label: item.key,
+                maxValue: AllCommandMaxValueRes.potassium.maxValue,
             }
             averageGraphData.graphData.push(tempData)
         }
-         if (item.key ==='Humidity') {
+         if (item.key === AllCommandMaxValueRes.potassium.key) {
             const sum = item.graphData.reduce(function(prev: any, current: any) {
                 return prev  +current.value
               }, 0);
             const tempData = {
                 value: sum/item.graphData?.length || 0,
-                label: item.key
+                label: item.key,
+                maxValue: AllCommandMaxValueRes.potassium.maxValue,
+            }
+            averageGraphData.graphData.push(tempData)
+        }
+         if (item.key === AllCommandMaxValueRes.mois.key) {
+            const sum = item.graphData.reduce(function(prev: any, current: any) {
+                return prev  +current.value
+              }, 0);
+            const tempData = {
+                value: sum/item.graphData?.length || 0,
+                label: item.key,
+                maxValue: AllCommandMaxValueRes.mois.maxValue,
             }
             averageGraphData.graphData.push(tempData)
         }

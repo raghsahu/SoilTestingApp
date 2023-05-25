@@ -61,7 +61,7 @@ export const dateFormatToDDMMYYYY = (date: string)=> {
 }
 
 export const getTime = (date: string)=> {
-  const newFormatDate = moment(date).format('HH a');
+  const newFormatDate = moment(date).format('hh a');
   return newFormatDate;
 }
 
@@ -151,4 +151,13 @@ export const getSeparatedValues = async (uniqueArray: any[])=> {
 
   });
   return allSevenValues;
+}
+
+export const getPercentageValue = (value: number, total: number) => {
+  const result = (Number(value) / total) * 100;
+  let parsedValue = parseFloat(result.toString());
+  if (!isNaN(parsedValue)) {
+    parsedValue = parseFloat(parsedValue.toFixed(2));
+  }
+  return parsedValue;
 }
