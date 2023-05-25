@@ -215,6 +215,39 @@ export const fetchAllReportDataByFarm = async (db: any, groupId: number, farm_id
   }
 }
 
+export const fetchAllReportDataByGroup = async (db: any, groupId: number, toDate: string, fromDate?: string) => {
+  const reportRes = await db.get(ReportByFarm)
+  .catch((err: any)=> {
+    console.log('rrrErr ', err)
+  });
+  if (reportRes?.items?.length) {
+    const to_Date = new Date(toDate);
+    const from_Date = fromDate ? new Date(fromDate) : new Date(endDateFormatToUTC((new Date()).toString()));
+
+    const filteredData = reportRes.items.filter((item: ReportByFarmItems) => {
+      if (toDate.length && fromDate?.length) {
+        if (item.group_id === groupId &&
+          (new Date(item.create_time) >= to_Date || new Date(item.create_time) === to_Date)
+          &&
+          (new Date(item.create_time) <= from_Date || new Date(item.create_time) === from_Date)
+        ) {
+          return item
+        }
+      } else if (toDate.length && !fromDate?.length) {
+        if (item.group_id === groupId &&
+          new Date(item.create_time).getDate() === to_Date.getDate()
+        ) {
+          return item
+        }
+      }
+    }
+    );
+    return filteredData || [] as ReportByFarmItems[];
+  }else{
+    return [] as ReportByFarmItems[];
+  }
+}
+
 export const fetchAllReportDataByDate = async (db: any, toDate: string, fromDate?: string) => {
   const reportRes = await db.get(ReportByFarm)
   .catch((err: any)=> {

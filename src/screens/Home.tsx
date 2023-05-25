@@ -14,7 +14,6 @@ import {Button, Statusbar, Header, GroupTabItem} from '../components';
 import {BarChart} from 'react-native-gifted-charts';
 import {
   getGraphReportData,
-  getSelectedGraphReportData,
 } from '../utils/GraphData';
 import GroupByItemList from '../components/GroupByItemList';
 import AddNewGroupModal from '../components/AddNewGroupModal';
@@ -36,6 +35,7 @@ import {
   fetchAllGroupData,
   fetchAllReportDataByDate,
   fetchAllReportDataByFarm,
+  fetchAllReportDataByGroup,
   initializeSoilDb,
   saveFarmData,
   saveGroupData,
@@ -528,6 +528,45 @@ const Home = (props: any) => {
     }
   };
 
+  const getAllReportByGroup = async (
+    groupData: CreateGroupItems,
+    toDate: string,
+    fromDate?: string
+  ) => {
+    setState((prev) => {
+      return {
+        ...prev,
+        isReportLoading: true,
+      };
+    });
+    const allReportRes = await fetchAllReportDataByGroup(
+      db,
+      groupData.group_id,
+      toDate,
+      fromDate
+    );
+    if (allReportRes?.length) {
+      const allGraphReportData = await getGraphReportData(allReportRes);
+      setState((prev) => {
+        return {
+          ...prev,
+          allGraphReportData: allGraphReportData.allSeparateGraph,
+          allInOneReportData: allGraphReportData.allInOneGraph,
+          isReportLoading: false,
+        };
+      });
+    } else {
+      setState((prev) => {
+        return {
+          ...prev,
+          isReportLoading: false,
+          reportByFarmList: [],
+          allGraphReportData: [],
+        };
+      });
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Statusbar />
@@ -742,9 +781,14 @@ const Home = (props: any) => {
                             return {
                               ...prev,
                               isFarmLoading: true,
+                              isSelectedFarmItem: {} as CreateFarmsItems,
                             };
                           });
                           fetchGroupByFarmList(item?.group_id);
+                          getAllReportByGroup(
+                            item,
+                            state.filterByToDate,
+                            state.filterByFromDate)
                         }
                       }}
                       onTabLongClick={() => {

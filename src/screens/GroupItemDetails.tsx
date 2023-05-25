@@ -13,7 +13,7 @@ import {
 import { VStack, Text, View, HStack, Image, FlatList } from 'native-base';
 import { Button, Statusbar, Header } from '../components';
 import { BarChart } from 'react-native-gifted-charts';
-import { getGraphReportData, getSelectedGraphReportData } from '../utils/GraphData';
+import { getGraphReportData } from '../utils/GraphData';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
@@ -167,12 +167,12 @@ const GroupItemDetails = (props: any) => {
   };
 
   const setSelectedGraphData = async (selectedSample: ReportByFarmItems) => {
-    const allGraphReportData = await getSelectedGraphReportData(selectedSample);
+    const allGraphReportData = await getGraphReportData([selectedSample]);
     setState((prev) => {
       return {
         ...prev,
-        allGraphReportData: allGraphReportData,
-        allInOneReportData: {} as GraphBarDataInterface,
+        allGraphReportData: allGraphReportData.allSeparateGraph,
+        allInOneReportData: allGraphReportData.allInOneGraph,
       };
     });
   }
@@ -285,7 +285,7 @@ const GroupItemDetails = (props: any) => {
           if (devices?.length > 0) {
             connectUsbSerialPort(devices);
           } else {
-            showToast('Please check bluetooth or USB device')
+           // showToast('Please check bluetooth or USB device')
           }
         }
       }
@@ -313,7 +313,7 @@ const GroupItemDetails = (props: any) => {
       console.log(`Connected to device: ${device.name} (${device.id})`);
       discoverServices(connectedDevice);
     } catch (error) {
-      showToast(`Error connecting to device: ${device.name}`)
+      showToast(`Error connecting to device`)
       console.log(error);
     }
   };
@@ -586,7 +586,7 @@ const GroupItemDetails = (props: any) => {
                 </View>
                 :
                 state.isAllInOneGraphOpen ?
-                  state.allGraphReportData?.length > 0 ?
+                  state.allInOneReportData?.graphData?.length > 0 ?
                     <View
                       justifyContent={'center'}
                       height={323}
@@ -595,7 +595,7 @@ const GroupItemDetails = (props: any) => {
                       ml={2}
                       mr={2}
                     >
-                    {state.allInOneReportData.graphData?.map((item: GraphSingleData) => {
+                    {state.allInOneReportData?.graphData.map((item: GraphSingleData) => {
                       return (
                         <PercentageBar
                           height={8}
