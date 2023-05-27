@@ -55,7 +55,7 @@ const ReportByFarmItemList = (props: ReportListItemInterface) => {
                 height: 115,
             }}
             //swipeContainerStyle={styles.swipeContentContainerStyle}
-           // leftButtons={props?.isCollectingSamplePage ? undefined : (isSelectedFarmItem?.farm_id === item.farm_id) ? leftButton : undefined}
+            // leftButtons={props?.isCollectingSamplePage ? undefined : (isSelectedFarmItem?.farm_id === item.farm_id) ? leftButton : undefined}
             disableSwipeIfNoButton
         >
             <Pressable
@@ -68,7 +68,7 @@ const ReportByFarmItemList = (props: ReportListItemInterface) => {
                 }}
             >
                 <HStack
-                    //flex={1}
+                //flex={1}
                 >
                     <CircleImageBackground
                         style={styles.profileImage}
@@ -142,18 +142,18 @@ const ReportByFarmItemList = (props: ReportListItemInterface) => {
                                 {props?.isCollectingSamplePage ? '1  Sample is collecting...' : item.sampleCount + ' Samples collected'}
                             </Text>
                             {!props?.isCollectingSamplePage ?
-                            <Text
-                                fontFamily={'Poppins-Regular'}
-                                fontStyle={'normal'}
-                                fontWeight={500}
-                                fontSize={10}
-                                color={COLORS.black_200}
-                                alignSelf={'flex-end'}
-                                marginLeft={5}
-                            >
-                                {''+ moment(new Date(item?.create_time)).fromNow()}
-                            </Text>
-                            : <></>}
+                                <Text
+                                    fontFamily={'Poppins-Regular'}
+                                    fontStyle={'normal'}
+                                    fontWeight={500}
+                                    fontSize={10}
+                                    color={COLORS.black_200}
+                                    alignSelf={'flex-end'}
+                                    marginLeft={5}
+                                >
+                                    {'' + moment(new Date(item?.create_time)).fromNow()}
+                                </Text>
+                                : <></>}
                         </HStack>
                     </VStack>
                 </HStack>

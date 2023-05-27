@@ -39,7 +39,7 @@ const GroupByItemList = (props: GroupListItemInterface) => {
                 alignSelf: 'center',
                 aspectRatio: 1,
                 flexDirection: 'row',
-               // padding: 5,
+                // padding: 5,
             }}
 
         >
@@ -84,11 +84,11 @@ const GroupByItemList = (props: GroupListItemInterface) => {
                 alignSelf: 'center',
                 aspectRatio: 1,
                 flexDirection: 'row',
-               // padding: 5,
+                // padding: 5,
             }}
 
         >
-           <TouchableOpacity
+            <TouchableOpacity
                 style={{
                     justifyContent: 'center',
                     alignContent: 'center',
@@ -115,6 +115,7 @@ const GroupByItemList = (props: GroupListItemInterface) => {
                 margin: 5,
                 //backgroundColor: getBgColors(item),
                 borderRadius: 8,
+                height: 115,
             }}
             //swipeContainerStyle={styles.swipeContentContainerStyle}
             leftButtons={props?.isCollectingSamplePage ? undefined : (isSelectedFarmItem?.farm_id === item.farm_id) ? leftButton : undefined}
@@ -131,7 +132,7 @@ const GroupByItemList = (props: GroupListItemInterface) => {
                 }}
             >
                 <HStack
-                    flex={1}
+                //flex={1}
                 >
                     <CircleImageBackground
                         style={styles.profileImage}
@@ -213,33 +214,33 @@ const GroupByItemList = (props: GroupListItemInterface) => {
                                 alignSelf={'flex-end'}
                                 marginLeft={5}
                             >
-                                {''+ moment(new Date(item?.create_time)).fromNow()}
+                                {'' + moment(new Date(item?.create_time)).fromNow()}
                             </Text>
                         </HStack>
                     </VStack>
 
-                    {!props?.isCollectingSamplePage ?             
-                    <Pressable
-                        backgroundColor={COLORS.brown_400}
-                        borderTopLeftRadius={42}
-                        borderBottomLeftRadius={42}
-                        width={42}
-                        height={'80%'}
-                        justifyContent={'center'}
-                        alignContent={'center'}
-                        alignSelf={'center'}
-                        flex={0.2}
-                        onPress={() => {
-                            onItemPlusClick && onItemPlusClick();
-                        }}
-                    >
-                        <Image
-                            style={styles.plusIcon}
-                            source={IMAGES.PlusIcon}
-                            resizeMode="contain"
-                        />
-                    </Pressable>
-                    :<></>}
+                    {!props?.isCollectingSamplePage ?
+                        <Pressable
+                            backgroundColor={COLORS.brown_400}
+                            borderTopLeftRadius={42}
+                            borderBottomLeftRadius={42}
+                            width={42}
+                            height={'80%'}
+                            justifyContent={'center'}
+                            alignContent={'center'}
+                            alignSelf={'center'}
+                            flex={0.2}
+                            onPress={() => {
+                                onItemPlusClick && onItemPlusClick();
+                            }}
+                        >
+                            <Image
+                                style={styles.plusIcon}
+                                source={IMAGES.PlusIcon}
+                                resizeMode="contain"
+                            />
+                        </Pressable>
+                        : <></>}
                 </HStack>
             </Pressable>
         </SwipeItem>
