@@ -31,7 +31,7 @@ import {
 import {
   deleteFarmData,
   deleteGroupData,
-  fetchAllGroupByFarmList,
+  fetchAllFarmByGroupList,
   fetchAllGroupData,
   fetchAllReportDataByDate,
   fetchAllReportDataByFarm,
@@ -90,8 +90,8 @@ const Home = (props: any) => {
 
   useEffect(() => {
     const backAction = () => {
-      BackHandler.exitApp();
-      //props.navigation.goBack();
+      //BackHandler.exitApp();
+      props.navigation.goBack();
       return true;
     };
     const backHandler = BackHandler.addEventListener(
@@ -105,10 +105,6 @@ const Home = (props: any) => {
     checkUsbSerial();
     getAllGroupLists();
   }, [props]);
-
-  useEffect(() => {
-    // getAllReportByDate(state.filterByToDate, state.filterByFromDate);
-  }, []);
 
   // Refresh data on focus
   useFocusEffect(
@@ -141,7 +137,7 @@ const Home = (props: any) => {
           if (devices?.length > 0) {
             connectUsbSerialPort(devices);
           } else {
-            showToast('Please check bluetooth or USB device');
+           // showToast('Please check bluetooth or USB device');
           }
         }
       }
@@ -223,7 +219,7 @@ const Home = (props: any) => {
         };
       });
     } catch (error) {
-      showToast(`Error connecting to device: ${device.name}`);
+     // showToast(`Error connecting to device: ${device.name}`);
       setState((prev) => {
         return {
           ...prev,
@@ -278,6 +274,7 @@ const Home = (props: any) => {
         setState((prev) => {
           return {
             ...prev,
+            groupTabList: [],
             openAddGroupModal: true,
             isFirstGroupCreated: true,
           };
@@ -305,10 +302,11 @@ const Home = (props: any) => {
           : allGroupRes[0]?.group_id
       );
     } else {
-      if (state.groupTabList.length === 0) {
+      if (allGroupRes?.length === 0) {
         setState((prev) => {
           return {
             ...prev,
+            groupTabList: [],
             openAddGroupModal: true,
             isFirstGroupCreated: true,
           };
@@ -318,7 +316,7 @@ const Home = (props: any) => {
   };
 
   const fetchGroupByFarmList = async (group_id: number) => {
-    const allFarmRes = await fetchAllGroupByFarmList(db, group_id);
+    const allFarmRes = await fetchAllFarmByGroupList(db, group_id);
     if (allFarmRes?.length) {
       setState((prev) => {
         return {
@@ -418,9 +416,13 @@ const Home = (props: any) => {
           return {
             ...prev,
             isSelectedGroup: {} as CreateGroupItems,
+            groupByFarmList: [] as CreateFarmsItems[],
+            openAddGroupModal: false,
+            openUpdateGroupModal: false,
           };
         });
         getAllGroupLists();
+        getAllReportByDate(state.filterByToDate, state.filterByFromDate);
       }
     } catch (err) {
       console.error(err);
@@ -439,6 +441,7 @@ const Home = (props: any) => {
           };
         });
         fetchGroupByFarmList(state.isSelectedGroup?.group_id);
+        getAllReportByDate(state.filterByToDate, state.filterByFromDate);
       }
     } catch (err) {
       console.error(err);
@@ -506,6 +509,7 @@ const Home = (props: any) => {
       toDate,
       fromDate
     );
+
     if (allReportRes?.length) {
       const allGraphReportData = await getGraphReportData(allReportRes);
       setState((prev) => {

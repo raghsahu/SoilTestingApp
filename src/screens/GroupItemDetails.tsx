@@ -73,7 +73,7 @@ const GroupItemDetails = (props: any) => {
 
   useEffect(() => {
     const backAction = () => {
-      props.navigation.goBack();
+      props.navigation.goBack(null);
       return true;
     };
 
@@ -144,7 +144,6 @@ const GroupItemDetails = (props: any) => {
     );
     if (allReportRes?.length) {
       const allGraphReportData = await getGraphReportData(allReportRes);
-      //console.log('rrr666 ', JSON.stringify(allGraphReportData))
       setState((prev) => {
         return {
           ...prev,
@@ -192,7 +191,7 @@ const GroupItemDetails = (props: any) => {
           if (devices?.length > 0) {
             connectUsbSerialPort(devices);
           } else {
-            showToast('Please check bluetooth or USB device')
+           // showToast('Please check bluetooth or USB device')
           }
         }
       }
@@ -303,6 +302,7 @@ const GroupItemDetails = (props: any) => {
         await manager.cancelDeviceConnection(device.id);
       }
       const connectedDevice = await manager.connectToDevice(device.id);
+      state.connectedBleDevice = connectedDevice;
       setState((prev) => {
         return {
           ...prev,
@@ -310,10 +310,10 @@ const GroupItemDetails = (props: any) => {
           isConnectedBy: 'Bluetooth',
         };
       });
-      console.log(`Connected to device: ${device.name} (${device.id})`);
+      console.log(`Connected to device: ${connectedDevice.name} (${connectedDevice.id})`);
       discoverServices(connectedDevice);
     } catch (error) {
-      showToast(`Error connecting to device`)
+      //showToast(`Error connecting to device`)
       console.log(error);
     }
   };
@@ -374,6 +374,12 @@ const GroupItemDetails = (props: any) => {
         `Error discovering services for device: ${device.name} (${device.id})`
       );
       console.log(error);
+      setState((prev) => {
+        return {
+          ...prev,
+          isFarmLoading: false,
+        };
+      });
     }
   };
 
@@ -476,7 +482,7 @@ const GroupItemDetails = (props: any) => {
             }}
             label={state.connectedBleDevice?.name ? 'Device: ' + state.connectedBleDevice?.name :
               state.connectedUsbDevice?.deviceId ? 'Device Id: ' + state.connectedUsbDevice?.deviceId :
-                'No Device Connected'}
+                ''}
           ></Header>
           
             <VStack marginLeft={5} marginRight={5}>

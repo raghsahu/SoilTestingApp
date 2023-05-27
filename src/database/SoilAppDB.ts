@@ -68,6 +68,23 @@ export const deleteGroupData = async (db: any, isSelectedGroup: CreateGroupItems
   const doc = await db.get(GroupListDoc);
   // Find the index of the item you want to update
   const itemIndex = doc.items.findIndex((item: CreateGroupItems) => item.group_id === isSelectedGroup.group_id);
+  
+  await db.get(GroupByFarmListDoc)
+  .then((doc: any) => {
+    doc.items = doc.items.filter((item: ReportByFarmItems) => 
+    item.group_id !== isSelectedGroup.group_id);
+    // Save the updated document back to the database
+    return db.put(doc);
+  })
+
+  await db.get(ReportByFarm)
+  .then((doc: any) => {
+    doc.items = doc.items.filter((item: ReportByFarmItems) => 
+    !(item.group_id === isSelectedGroup.group_id));
+    // Save the updated document back to the database
+    return db.put(doc);
+  })
+
   // If the item exists, remove it from the array and save the updated document
   if (itemIndex >= 0) {
     doc.items.splice(itemIndex, 1);
@@ -123,21 +140,32 @@ export const updateFarmData = async (db: any, newItem: CreateFarmsItems, isSelec
   return await db.put(doc);
 }
 
-export const deleteFarmData = async (db: any, isSelectedGroup: CreateFarmsItems) => {
+export const deleteFarmData = async (db: any, isSelectedFarmItem: CreateFarmsItems) => {
   // Get the document by its ID
   const doc = await db.get(GroupByFarmListDoc);
   // Find the index of the item you want to update
-  const itemIndex = doc.items.findIndex((item: CreateFarmsItems) => item.farm_id === isSelectedGroup.farm_id);
+  const itemIndex = doc.items.findIndex((item: CreateFarmsItems) => item.farm_id === isSelectedFarmItem.farm_id);
+  
+  await db.get(ReportByFarm)
+  .then((doc: any) => {
+    doc.items = doc.items.filter((item: ReportByFarmItems) => 
+    !(item.farm_id === isSelectedFarmItem.farm_id 
+      && item.group_id === isSelectedFarmItem.group_id));
+
+    // Save the updated document back to the database
+    return db.put(doc);
+  })
+
   // If the item exists, remove it from the array and save the updated document
   if (itemIndex >= 0) {
     doc.items.splice(itemIndex, 1);
     return await db.put(doc);
   } else {
-    console.log(`Item with id 'item2' not found in document '${GroupListDoc}'.`);
+    console.log(`Item not found in document '${GroupByFarmListDoc}'.`);
   }
 }
 
-export const fetchAllGroupByFarmList = async (db: any, groupId: number) => {
+export const fetchAllFarmByGroupList = async (db: any, groupId: number) => {
   const groupRes = await db.get(GroupByFarmListDoc);
   if (groupRes?.items?.length) {
     const filteredData = groupRes.items.filter((item: CreateFarmsItems) =>
@@ -180,17 +208,17 @@ export const saveReportByFarm = async (db: any, newItem: ReportByFarmItems) => {
   })
 }
 
-export const fetchAllReportDataByFarm = async (db: any, groupId: number, farm_id: number, toDate: string, fromDate?: string) => {
+export const fetchAllReportDataByFarm = async (db: any, groupId: number, farm_id: number, toDate?: string, fromDate?: string) => {
   const reportRes = await db.get(ReportByFarm)
   .catch((err: any)=> {
-    console.log('rrrErr ', err)
+    console.log('err ', err)
   });
   if (reportRes?.items?.length) {
-    const to_Date = new Date(toDate);
+    const to_Date = toDate ? new Date(toDate) : new Date(endDateFormatToUTC((new Date()).toString()));
     const from_Date = fromDate ? new Date(fromDate) : new Date(endDateFormatToUTC((new Date()).toString()));
 
     const filteredData = reportRes.items.filter((item: ReportByFarmItems) => {
-      if (toDate.length && fromDate?.length) {
+      if (toDate?.length && fromDate?.length) {
         if (item.group_id === groupId &&
           item.farm_id === farm_id &&
           (new Date(item.create_time) >= to_Date || new Date(item.create_time) === to_Date)
@@ -199,10 +227,16 @@ export const fetchAllReportDataByFarm = async (db: any, groupId: number, farm_id
         ) {
           return item
         }
-      } else if (toDate.length && !fromDate?.length) {
+      } else if (toDate?.length && !fromDate?.length) {
         if (item.group_id === groupId &&
           item.farm_id === farm_id &&
           new Date(item.create_time).getDate() === to_Date.getDate()
+        ) {
+          return item
+        }
+      } else {
+        if (item.group_id === groupId &&
+          item.farm_id === farm_id
         ) {
           return item
         }
@@ -218,7 +252,7 @@ export const fetchAllReportDataByFarm = async (db: any, groupId: number, farm_id
 export const fetchAllReportDataByGroup = async (db: any, groupId: number, toDate: string, fromDate?: string) => {
   const reportRes = await db.get(ReportByFarm)
   .catch((err: any)=> {
-    console.log('rrrErr ', err)
+    console.log('err ', err)
   });
   if (reportRes?.items?.length) {
     const to_Date = new Date(toDate);
@@ -251,9 +285,8 @@ export const fetchAllReportDataByGroup = async (db: any, groupId: number, toDate
 export const fetchAllReportDataByDate = async (db: any, toDate: string, fromDate?: string) => {
   const reportRes = await db.get(ReportByFarm)
   .catch((err: any)=> {
-    console.log('rrrErr ', err)
+    console.log('err ', err)
   });
-
   if (reportRes?.items?.length) {
     const to_Date = new Date(toDate);
     const from_Date = fromDate ? new Date(fromDate) : new Date(endDateFormatToUTC((new Date()).toString()));
@@ -268,10 +301,7 @@ export const fetchAllReportDataByDate = async (db: any, toDate: string, fromDate
         }
       }
       else if (toDate.length && !fromDate?.length) {
-        if (new Date(item.create_time).getDate() === to_Date.getDate()
-          // &&
-          // new Date(item.create_time) <= from_Date
-        ) {
+        if (new Date(item.create_time).getDate() === to_Date.getDate()) {
           return item
         }
       }
@@ -285,7 +315,7 @@ export const fetchAllReportDataByDate = async (db: any, toDate: string, fromDate
 export const fetchSamplesCountByFarm = async (db: any, groupId: number, farm_id: number) => {
   const reportRes = await db.get(ReportByFarm)
   .catch((err: any)=> {
-    console.log('rrrErr ', err)
+    console.log('err ', err)
   });;
   if (reportRes?.items?.length) {
     const filteredData = reportRes.items.filter((item: ReportByFarmItems) => {
