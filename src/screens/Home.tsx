@@ -685,7 +685,6 @@ const Home = (props: any) => {
                 backgroundColor={COLORS.brown_400}
                 mt={5}
                 borderRadius={16}
-                flex={1}
                 width={355}
                 ml={2}
                 mr={2}
@@ -713,7 +712,7 @@ const Home = (props: any) => {
               </View>
             )
           ) : state.allGraphReportData?.length > 0 ? (
-            <SwiperFlatList index={0}>
+             <SwiperFlatList index={0}>
               {state.allGraphReportData?.map((item: any) => {
                 return (
                   <View
@@ -751,7 +750,7 @@ const Home = (props: any) => {
                   </View>
                 );
               })}
-            </SwiperFlatList>
+             </SwiperFlatList>
           ) : (
             <View
               height={323}
