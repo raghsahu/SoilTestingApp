@@ -88,7 +88,7 @@ const GroupItemDetails = (props: any) => {
   useEffect(() => {
     checkUsbSerial();
     updateSampleCountByFarm();
-    setTimeout(()=> {
+    setTimeout(() => {
       getAllReportByFarmLists(state.filterByToDate, state.filterByFromDate);
     }, 3000)
   }, [props]);
@@ -107,7 +107,7 @@ const GroupItemDetails = (props: any) => {
       setUser(user);
     }
   }, []);
-  
+
   const updateSampleCountByFarm = async () => {
     const farmReportLength = await fetchSamplesCountByFarm(
       db,
@@ -177,7 +177,7 @@ const GroupItemDetails = (props: any) => {
   }
 
   const checkUsbSerial = async () => {
-      checkBleSerial();
+    checkBleSerial();
   };
 
   const checkBleSerial = async () => {
@@ -191,7 +191,7 @@ const GroupItemDetails = (props: any) => {
           if (devices?.length > 0) {
             connectUsbSerialPort(devices);
           } else {
-           // showToast('Please check bluetooth or USB device')
+            // showToast('Please check bluetooth or USB device')
           }
         }
       }
@@ -265,9 +265,10 @@ const GroupItemDetails = (props: any) => {
   const scanForDevices = () => {
     manager.startDeviceScan(null, null, async (error, device) => {
       if (error) {
-        console.log(error);
+        console.log('scanError', error);
         return;
       }
+
       if (device?.name === deviceName) {
         AsyncStorage.setItem(AsyncKey.device, JSON.stringify(device));
         setState((prev) => {
@@ -284,7 +285,7 @@ const GroupItemDetails = (props: any) => {
           if (devices?.length > 0) {
             connectUsbSerialPort(devices);
           } else {
-           // showToast('Please check bluetooth or USB device')
+            // showToast('Please check bluetooth or USB device')
           }
         }
       }
@@ -399,7 +400,7 @@ const GroupItemDetails = (props: any) => {
       return {
         ...prev,
         readingTempData: newItem,
-       // reportByFarmList: [...[newItem], ...state.reportByFarmList],
+        // reportByFarmList: [...[newItem], ...state.reportByFarmList],
         allGraphReportData: allGraphReportData.allSeparateGraph,
         allInOneReportData: allGraphReportData.allInOneGraph,
         isFarmLoading: false,
@@ -484,14 +485,14 @@ const GroupItemDetails = (props: any) => {
               state.connectedUsbDevice?.deviceId ? 'Device Id: ' + state.connectedUsbDevice?.deviceId :
                 ''}
           ></Header>
-          
-            <VStack marginLeft={5} marginRight={5}>
-              <HStack
-                marginTop={8}
-                width={'100%'}
-                justifyContent={'space-between'}
-                alignContent={'center'}
-              >
+
+          <VStack marginLeft={5} marginRight={5}>
+            <HStack
+              marginTop={8}
+              width={'100%'}
+              justifyContent={'space-between'}
+              alignContent={'center'}
+            >
               <HStack>
                 <VStack>
                   <Text
@@ -518,89 +519,91 @@ const GroupItemDetails = (props: any) => {
                   </Text>
                 </VStack>
                 <TouchableOpacity
-                    style={{ justifyContent: 'center', alignItems: 'center', marginLeft: 5 }}
-                    onPress={() => {
-                      refreshReadingData();
+                  style={{ justifyContent: 'center', alignItems: 'center', marginLeft: 5 }}
+                  onPress={() => {
+                    refreshReadingData();
+                  }}
+                >
+                  <Image
+                    style={{
+                      height: 24,
+                      width: 24,
+                      alignSelf: 'center',
                     }}
-                  >
-                    <Image
-                      style={{  height: 24,
-                        width: 24,
-                        alignSelf: 'center',}}
-                      source={IMAGES.RefreshIcon}
-                      resizeMode="contain"
-                    />
-                  </TouchableOpacity>
-                </HStack>
-                <HStack>
-                  <TouchableOpacity
-                    style={{ justifyContent: 'center', alignItems: 'center' }}
-                    onPress={() => {
-                      setState((prev) => {
-                        return {
-                          ...prev,
-                          openDatePicker: true,
-                        }
-                      })
-                    }}
-                  >
-                    <HStack marginRight={2}>
-                      <Text
-                        fontSize={10}
-                        fontWeight={500}
-                        fontFamily={'Poppins-Regular'}
-                        color={COLORS.black_200}
-                        style={{
-                          paddingRight: 5,
-                          alignSelf: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        {`${dateFormatToDDMMYYYY(state.filterByToDate)} ${state.filterByFromDate ? '-' + dateFormatToDDMMYYYY(state.filterByFromDate) : ''}`}
-                      </Text>
-
-                      <Image
-                        style={styles.calendarIcon}
-                        source={IMAGES.CalendarIcon}
-                        resizeMode="contain"
-                      />
-                    </HStack>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.graphIconBg}
-                    onPress={() => {
-                      setState((prev) => {
-                        return {
-                          ...prev,
-                          isAllInOneGraphOpen: !state.isAllInOneGraphOpen,
-                        }
-                      })
-                    }}
-                  >
-                    <Image
-                      style={styles.graphIcon}
-                      source={IMAGES.GraphIcon}
-                      resizeMode="contain"
-                    />
-                  </TouchableOpacity>
-                </HStack>
+                    source={IMAGES.RefreshIcon}
+                    resizeMode="contain"
+                  />
+                </TouchableOpacity>
               </HStack>
-
-              {state.isFarmLoading ?
-                <View height={323} justifyContent={'center'} alignItems={'center'}>
-                  <ActivityIndicator size="large" color={COLORS.brown_500} />
-                </View>
-                :
-                state.isAllInOneGraphOpen ?
-                  state.allInOneReportData?.graphData?.length > 0 ?
-                    <View
-                      justifyContent={'center'}
-                      height={323}
-                      width={355}
-                      backgroundColor={COLORS.white}
-                      ml={2}
-                      mr={2}
+              <HStack>
+                <TouchableOpacity
+                  style={{ justifyContent: 'center', alignItems: 'center' }}
+                  onPress={() => {
+                    setState((prev) => {
+                      return {
+                        ...prev,
+                        openDatePicker: true,
+                      }
+                    })
+                  }}
+                >
+                  <HStack marginRight={2}>
+                    <Text
+                      fontSize={10}
+                      fontWeight={500}
+                      fontFamily={'Poppins-Regular'}
+                      color={COLORS.black_200}
+                      style={{
+                        paddingRight: 5,
+                        alignSelf: 'center',
+                        justifyContent: 'center',
+                      }}
                     >
+                      {`${dateFormatToDDMMYYYY(state.filterByToDate)} ${state.filterByFromDate ? '-' + dateFormatToDDMMYYYY(state.filterByFromDate) : ''}`}
+                    </Text>
+
+                    <Image
+                      style={styles.calendarIcon}
+                      source={IMAGES.CalendarIcon}
+                      resizeMode="contain"
+                    />
+                  </HStack>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.graphIconBg}
+                  onPress={() => {
+                    setState((prev) => {
+                      return {
+                        ...prev,
+                        isAllInOneGraphOpen: !state.isAllInOneGraphOpen,
+                      }
+                    })
+                  }}
+                >
+                  <Image
+                    style={styles.graphIcon}
+                    source={IMAGES.GraphIcon}
+                    resizeMode="contain"
+                  />
+                </TouchableOpacity>
+              </HStack>
+            </HStack>
+
+            {state.isFarmLoading ?
+              <View height={323} justifyContent={'center'} alignItems={'center'}>
+                <ActivityIndicator size="large" color={COLORS.brown_500} />
+              </View>
+              :
+              state.isAllInOneGraphOpen ?
+                state.allInOneReportData?.graphData?.length > 0 ?
+                  <View
+                    justifyContent={'center'}
+                    height={323}
+                    width={355}
+                    backgroundColor={COLORS.white}
+                    ml={2}
+                    mr={2}
+                  >
                     {state.allInOneReportData?.graphData.map((item: GraphSingleData) => {
                       return (
                         <PercentageBar
@@ -612,104 +615,166 @@ const GroupItemDetails = (props: any) => {
                         />
                       );
                     })}
-                    </View>
-                    :
-                    <View height={323} justifyContent={'center'} alignItems={'center'}>
-                      <Text color={COLORS.black_200}>No Reports Available</Text>
-                    </View>
+                  </View>
                   :
-                  state.allGraphReportData?.length > 0 ?
-                  <SwiperFlatList index={0}>
-                      {
-                        state.allGraphReportData?.map((item: any) => {
-                          return (
-                            <View
-                              //flex={1}
-                              justifyContent={'center'}
-                              height={323}
-                              width={355}
-                              backgroundColor={COLORS.white}
-                              ml={2}
-                              mr={2}
-                              borderRadius={16}
-                            >
-                              <Text
-                                mb={2}
-                                fontSize={16}
-                                fontWeight={500}
-                                fontFamily={'Poppins-Regular'}
-                                color={COLORS.black}
-                                style={{ marginLeft: 5, paddingLeft: 5 }}
-                              >
-                                {item.graphHeader}
-                              </Text>
-                              <BarChart
-                                // areaChart
-                                width={305}
-                                //height={280}
-                                barWidth={8}
-                                //noOfSections={3}
-                                barBorderRadius={4}
-                                frontColor="lightgray"
-                                data={item.graphData}
-                                yAxisThickness={0}
-                                xAxisThickness={0}
-                                labelWidth={60}
-                                xAxisLabelTextStyle={{ fontSize: 10 }}
-                              />
-                            </View>
-                          );
-                        })
-                      }
-                    </SwiperFlatList>
-                    : <View height={323} justifyContent={'center'} alignItems={'center'}>
-                      <Text color={COLORS.black_200}>No Reports Available</Text>
+                  <View
+                    justifyContent={'center'}
+                    alignItems={'center'}
+                    justifyItems={'center'}
+                    alignSelf={'center'}
+                    alignContent={'center'}
+                    height={323}
+                    backgroundColor={COLORS.homeNoDataBg}
+                    mt={5}
+                    borderRadius={16}
+                    width={355}
+                    ml={2}
+                    mr={2}
+                  >
+                    <Image
+                      height={131}
+                      width={182}
+                      source={IMAGES.NoReportsDataIcon}
+                      alignSelf={'center'}
+                    />
+                    <View
+                      justifyContent={'center'} alignItems={'center'}
+                      justifyItems={'center'}
+                      alignSelf={'center'}
+                      width={'80%'}
+                    >
+                      <Text m={5} color={COLORS.black_200}
+                      >
+                        {`No reports available, Connect your device and start testing soil in seconds!`
+                        }
+                      </Text>
                     </View>
-              }
+                  </View>
+                :
+                state.allGraphReportData?.length > 0 ?
+                  <SwiperFlatList index={0}>
+                    {
+                      state.allGraphReportData?.map((item: any) => {
+                        return (
+                          <View
+                            //flex={1}
+                            justifyContent={'center'}
+                            height={323}
+                            width={355}
+                            backgroundColor={COLORS.white}
+                            ml={2}
+                            mr={2}
+                            borderRadius={16}
+                          >
+                            <Text
+                              mb={2}
+                              fontSize={16}
+                              fontWeight={500}
+                              fontFamily={'Poppins-Regular'}
+                              color={COLORS.black}
+                              style={{ marginLeft: 5, paddingLeft: 5 }}
+                            >
+                              {item.graphHeader}
+                            </Text>
+                            <BarChart
+                              // areaChart
+                              width={305}
+                              //height={280}
+                              barWidth={8}
+                              //noOfSections={3}
+                              barBorderRadius={4}
+                              frontColor="lightgray"
+                              data={item.graphData}
+                              yAxisThickness={0}
+                              xAxisThickness={0}
+                              labelWidth={60}
+                              xAxisLabelTextStyle={{ fontSize: 10 }}
+                            />
+                          </View>
+                        );
+                      })
+                    }
+                  </SwiperFlatList>
+                  :
+                  <View
+                    justifyContent={'center'}
+                    alignItems={'center'}
+                    justifyItems={'center'}
+                    alignSelf={'center'}
+                    alignContent={'center'}
+                    height={323}
+                    backgroundColor={COLORS.homeNoDataBg}
+                    mt={5}
+                    borderRadius={16}
+                    width={355}
+                    ml={2}
+                    mr={2}
+                  >
+                    <Image
+                      height={131}
+                      width={182}
+                      source={IMAGES.NoReportsDataIcon}
+                      alignSelf={'center'}
+                    />
+                    <View
+                      justifyContent={'center'} alignItems={'center'}
+                      justifyItems={'center'}
+                      alignSelf={'center'}
+                      width={'80%'}
+                    >
+                      <Text m={5} color={COLORS.black_200}
+                      >
+                        {`No reports available, Connect your device and start testing soil in seconds!`
+                        }
+                      </Text>
+                    </View>
+                  </View>
+            }
 
-              {state.isFarmLoading ?
-                <View justifyContent={'center'} alignItems={'center'}>
-                  <ActivityIndicator size="large" color={COLORS.brown_500} />
-                </View>
-                : 
-                state.readingTempData !== null ?
-                      <ReportByFarmItemList
-                          item={state.readingTempData}
-                          isCollectingSamplePage={true}
-                          isSelectedFarmItem={state.isSelectedFarmItem}
-                        />
+            {state.isFarmLoading ?
+              <View justifyContent={'center'} alignItems={'center'}>
+                <ActivityIndicator size="large" color={COLORS.brown_500} />
+              </View>
+              :
+              state.readingTempData !== null ?
+                <ReportByFarmItemList
+                  item={state.readingTempData}
+                  isCollectingSamplePage={true}
+                  isSelectedFarmItem={state.isSelectedFarmItem}
+                />
                 :
                 state.reportByFarmList?.length > 0 ? (
                   <View height={380}>
-                  <FlatList
-                    data={state.reportByFarmList}
-                    renderItem={({item}) => {
-                      return (
-                        <ReportByFarmItemList
-                          item={item}
-                          isCollectingSamplePage={false}
-                          isSelectedFarmItem={state.isSelectedFarmItem}
-                          onItemClick={() => {
-                            setState((prev) => {
-                              return {
-                                ...prev,
-                                isSelectedFarmItem: item,
-                              }
-                            });
-                            setSelectedGraphData(item);
-                          }}
-                        />
-                      )
-                    }}
-                    keyExtractor={(item, index) => index + item.farm_id + ''}
-                  />
+                    <FlatList
+                      data={state.reportByFarmList}
+                      renderItem={({ item }) => {
+                        return (
+                          <ReportByFarmItemList
+                            item={item}
+                            isCollectingSamplePage={false}
+                            isSelectedFarmItem={state.isSelectedFarmItem}
+                            onItemClick={() => {
+                              setState((prev) => {
+                                return {
+                                  ...prev,
+                                  isSelectedFarmItem: item,
+                                }
+                              });
+                              setSelectedGraphData(item);
+                            }}
+                          />
+                        )
+                      }}
+                      keyExtractor={(item, index) => index + item.farm_id + ''}
+                    />
                   </View>
                 ) :
-                  <View mt={10} justifyContent={'center'} alignItems={'center'}>
-                    <Text color={COLORS.black_200}>No Samples Available</Text>
-                  </View>
-              }
-            </VStack>
+                  <></>
+              // <View mt={10} justifyContent={'center'} alignItems={'center'}>
+              //   <Text color={COLORS.black_200}>No Samples Available</Text>
+              // </View>
+            }
+          </VStack>
 
           <View
             flex={1}
@@ -736,9 +801,9 @@ const GroupItemDetails = (props: any) => {
               }
             />
           </View>
-          
+
         </VStack>
-  
+
         {state.openDatePicker &&
           <StartEndDatePicker
             visible={state.openDatePicker}

@@ -15,6 +15,8 @@ export const IMAGES = {
     EditIcon: require('./images/editIcon.png'),
     CalendarIcon: require('./images/calendar.png'),
     RefreshIcon: require('./images/refreshIcon.png'),
+    NoGroupDataIcon: require('./images/no_group_farm_image.png'),
+    NoReportsDataIcon: require('./images/no_reports_data_image.png'),
 }
 
 export const COLORS = {
@@ -36,4 +38,5 @@ export const COLORS = {
     black_50: '#E6E6E6',
     black_100: '#B0B0B0',
     groupListItemBg: '#E6E6E64D',
+    homeNoDataBg: '#D9D9D936',
 }

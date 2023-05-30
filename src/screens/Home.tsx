@@ -21,6 +21,7 @@ import AddNewGroupModal from '../components/AddNewGroupModal';
 import UpdateGroupModal from '../components/UpdateGroupModal';
 import AddNewFarmModal from '../components/AddNewFarmModal';
 import {
+  AsyncKey,
   GetAllPermissions,
   dateFormatToDDMMYYYY,
   dateFormatToUTC,
@@ -61,6 +62,7 @@ import { SwiperFlatList } from 'react-native-swiper-flatlist';
 import PercentageBar from '../components/PercentageBar';
 import { BleManager, Device } from 'react-native-ble-plx';
 import { deviceName } from '../utils/Ble_UART_At_Command';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const manager = new BleManager();
 const Home = (props: any) => {
@@ -110,8 +112,6 @@ const Home = (props: any) => {
   // Refresh data on focus
   useFocusEffect(
     useCallback(() => {
-      getProfileDataFromLocalStorage();
-      getAllReportByDate(state.filterByToDate, state.filterByFromDate);
       if (state.isSelectedGroup?.group_id) {
         setState((prev) => {
           return {
@@ -121,7 +121,9 @@ const Home = (props: any) => {
         });
         fetchGroupByFarmList(state.isSelectedGroup?.group_id);
       }
-    }, [])
+      getAllReportByDate(state.filterByToDate, state.filterByFromDate);
+      getProfileDataFromLocalStorage();
+    }, [props])
   );
 
   const checkUsbSerial = async () => {
@@ -212,6 +214,7 @@ const Home = (props: any) => {
         await manager.cancelDeviceConnection(device.id);
       }
       const connectedDevice = await manager.connectToDevice(device.id);
+      AsyncStorage.setItem(AsyncKey.device, JSON.stringify(connectedDevice));
       setState((prev) => {
         return {
           ...prev,
@@ -426,7 +429,7 @@ const Home = (props: any) => {
         getAllReportByDate(state.filterByToDate, state.filterByFromDate);
       }
     } catch (err) {
-      console.error(err);
+      console.error('group_errr', err);
     }
   };
 
@@ -611,62 +614,64 @@ const Home = (props: any) => {
             >
               {'Soil Report'}
             </Text>
-            <HStack>
-              <TouchableOpacity
-                style={{ justifyContent: 'center', alignItems: 'center' }}
-                onPress={() => {
-                  setState((prev) => {
-                    return {
-                      ...prev,
-                      openDatePicker: true,
-                    };
-                  });
-                }}
-              >
-                <HStack marginRight={2}>
-                  <Text
-                    fontSize={10}
-                    fontWeight={500}
-                    fontFamily={'Poppins-Regular'}
-                    color={COLORS.black_200}
-                    style={{
-                      paddingRight: 5,
-                      alignSelf: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    {`${dateFormatToDDMMYYYY(state.filterByToDate)} ${state.filterByFromDate
+            {state.groupTabList?.length ?
+              <HStack>
+                <TouchableOpacity
+                  style={{ justifyContent: 'center', alignItems: 'center' }}
+                  onPress={() => {
+                    setState((prev) => {
+                      return {
+                        ...prev,
+                        openDatePicker: true,
+                      };
+                    });
+                  }}
+                >
+                  <HStack marginRight={2}>
+                    <Text
+                      fontSize={10}
+                      fontWeight={500}
+                      fontFamily={'Poppins-Regular'}
+                      color={COLORS.black_200}
+                      style={{
+                        paddingRight: 5,
+                        alignSelf: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      {`${dateFormatToDDMMYYYY(state.filterByToDate)} ${state.filterByFromDate
                         ? '-' + dateFormatToDDMMYYYY(state.filterByFromDate)
                         : ''
-                      }`}
-                  </Text>
+                        }`}
+                    </Text>
 
+                    <Image
+                      style={styles.calendarIcon}
+                      source={IMAGES.CalendarIcon}
+                      resizeMode="contain"
+                    />
+                  </HStack>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.graphIconBg}
+                  onPress={() => {
+                    setState((prev) => {
+                      return {
+                        ...prev,
+                        isAllInOneGraphOpen: !state.isAllInOneGraphOpen,
+                      };
+                    });
+                  }}
+                >
                   <Image
-                    style={styles.calendarIcon}
-                    source={IMAGES.CalendarIcon}
+                    style={styles.graphIcon}
+                    source={IMAGES.GraphIcon}
                     resizeMode="contain"
                   />
-                </HStack>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.graphIconBg}
-                onPress={() => {
-                  setState((prev) => {
-                    return {
-                      ...prev,
-                      isAllInOneGraphOpen: !state.isAllInOneGraphOpen,
-                    };
-                  });
-                }}
-              >
-                <Image
-                  style={styles.graphIcon}
-                  source={IMAGES.GraphIcon}
-                  resizeMode="contain"
-                />
-              </TouchableOpacity>
-            </HStack>
+                </TouchableOpacity>
+              </HStack>
+              : <></>}
           </HStack>
 
           {state.isReportLoading ? (
@@ -704,15 +709,44 @@ const Home = (props: any) => {
               </View>
             ) : (
               <View
-                height={323}
                 justifyContent={'center'}
                 alignItems={'center'}
+                justifyItems={'center'}
+                alignSelf={'center'}
+                alignContent={'center'}
+                height={323}
+                backgroundColor={COLORS.homeNoDataBg}
+                mt={5}
+                borderRadius={16}
+                width={355}
+                ml={2}
+                mr={2}
               >
-                <Text color={COLORS.black_200}>No Reports Available</Text>
+                <Image
+                  height={131}
+                  width={182}
+                  source={state.groupTabList?.length === 0 ? IMAGES.NoGroupDataIcon :
+                    IMAGES.NoReportsDataIcon}
+                  alignSelf={'center'}
+                />
+                <View
+                  justifyContent={'center'} alignItems={'center'}
+                  justifyItems={'center'}
+                  alignSelf={'center'}
+                  width={'80%'}
+                >
+                  <Text m={5} color={COLORS.black_200}
+                  >
+                    {state.groupTabList?.length === 0 ?
+                      `No data available, Please add groups and farms to start` :
+                      `No reports available, Connect your device and start testing soil in seconds!`
+                    }
+                  </Text>
+                </View>
               </View>
             )
           ) : state.allGraphReportData?.length > 0 ? (
-             <SwiperFlatList index={0}>
+            <SwiperFlatList index={0}>
               {state.allGraphReportData?.map((item: any) => {
                 return (
                   <View
@@ -750,90 +784,145 @@ const Home = (props: any) => {
                   </View>
                 );
               })}
-             </SwiperFlatList>
+            </SwiperFlatList>
           ) : (
             <View
-              height={323}
               justifyContent={'center'}
               alignItems={'center'}
+              justifyItems={'center'}
+              alignSelf={'center'}
+              alignContent={'center'}
+              height={323}
+              backgroundColor={COLORS.homeNoDataBg}
+              mt={5}
+              borderRadius={16}
+              width={355}
+              ml={2}
+              mr={2}
             >
-              <Text color={COLORS.black_200}>No Reports Available</Text>
+              <Image
+                height={131}
+                width={182}
+                source={state.groupTabList?.length ? IMAGES.NoGroupDataIcon :
+                  IMAGES.NoReportsDataIcon}
+                alignSelf={'center'}
+              />
+              <View
+                justifyContent={'center'} alignItems={'center'}
+                justifyItems={'center'}
+                alignSelf={'center'}
+                width={'80%'}
+              >
+                <Text m={5} color={COLORS.black_200}
+                >
+                  {state.groupTabList?.length ?
+                    `No data available, Please add groups and farms to start` :
+                    `No reports available, Connect your device and start testing soil in seconds!`
+                  }
+                </Text>
+              </View>
             </View>
           )}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={{ marginTop: 10 }}
-          >
-            {state.groupTabList?.length > 0 &&
-              state.groupTabList?.map((item: CreateGroupItems) => {
-                return (
-                  <GroupTabItem
-                    item={item}
-                    isSelectedGroup={state.isSelectedGroup}
-                    onTabClick={() => {
-                      setState((prev) => {
-                        return {
-                          ...prev,
-                          isSelectedGroup: item,
-                        };
-                      });
-                      if (item?.group_id) {
+          {state.groupTabList?.length > 0 &&
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={{ marginTop: 10 }}
+            >
+              {state.groupTabList?.length > 0 &&
+                state.groupTabList?.map((item: CreateGroupItems) => {
+                  return (
+                    <GroupTabItem
+                      item={item}
+                      isSelectedGroup={state.isSelectedGroup}
+                      onTabClick={() => {
                         setState((prev) => {
                           return {
                             ...prev,
-                            isFarmLoading: true,
-                            isSelectedFarmItem: {} as CreateFarmsItems,
+                            isSelectedGroup: item,
                           };
                         });
-                        fetchGroupByFarmList(item?.group_id);
-                        getAllReportByGroup(
-                          item,
-                          state.filterByToDate,
-                          state.filterByFromDate)
-                      }
-                    }}
-                    onTabLongClick={() => {
-                      setState((prev) => {
-                        return {
-                          ...prev,
-                          openUpdateGroupModal: true,
-                          isSelectedGroup: item,
-                        };
-                      });
-                    }}
-                  />
-                );
-              })}
-            <TouchableOpacity
-              style={{
-                height: 40,
-                margin: 5,
-                width: 83,
-                backgroundColor: COLORS.brown_300,
-                borderRadius: 8,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-              onPress={() => {
-                setState((prev) => {
-                  return {
-                    ...prev,
-                    openAddGroupModal: true,
-                  };
-                });
-              }}
-            >
-              <Text
+                        if (item?.group_id) {
+                          setState((prev) => {
+                            return {
+                              ...prev,
+                              isFarmLoading: true,
+                              isSelectedFarmItem: {} as CreateFarmsItems,
+                            };
+                          });
+                          fetchGroupByFarmList(item?.group_id);
+                          getAllReportByGroup(
+                            item,
+                            state.filterByToDate,
+                            state.filterByFromDate)
+                        }
+                      }}
+                      onTabLongClick={() => {
+                        setState((prev) => {
+                          return {
+                            ...prev,
+                            openUpdateGroupModal: true,
+                            isSelectedGroup: item,
+                          };
+                        });
+                      }}
+                    />
+                  );
+                })}
+              <TouchableOpacity
                 style={{
-                  color: COLORS.white,
+                  height: 40,
+                  margin: 5,
+                  width: 83,
+                  backgroundColor: COLORS.brown_300,
+                  borderRadius: 8,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+                onPress={() => {
+                  setState((prev) => {
+                    return {
+                      ...prev,
+                      openAddGroupModal: true,
+                    };
+                  });
                 }}
               >
-                {'Add New'}
-              </Text>
-            </TouchableOpacity>
-          </ScrollView>
-
+                <Text
+                  style={{
+                    color: COLORS.white,
+                  }}
+                >
+                  {'Add New'}
+                </Text>
+              </TouchableOpacity>
+            </ScrollView>
+          }
+          {state.groupTabList?.length === 0 &&
+            <View
+              flex={1}
+              mb={10}
+              mt={100}
+              width={'100%'}
+            >
+              <Button
+                text={'Create Group'}
+                style={{
+                  width: 180,
+                  alignSelf: 'center',
+                  backgroundColor: COLORS.brown_300,
+                }}
+                onPress={() => {
+                  setState((prev) => {
+                    return {
+                      ...prev,
+                      openAddGroupModal: true,
+                    };
+                  });
+                }}
+              />
+            </View>
+          }
           {state.isFarmLoading ? (
             <View justifyContent={'center'} alignItems={'center'}>
               <ActivityIndicator size="large" color={COLORS.brown_500} />
@@ -911,9 +1000,10 @@ const Home = (props: any) => {
               />
             </View>
           ) : (
-            <View mt={10} justifyContent={'center'} alignItems={'center'}>
-              <Text color={COLORS.black_200}>No Samples Available</Text>
-            </View>
+            <></>
+            // <View mt={10} justifyContent={'center'} alignItems={'center'}>
+            //   <Text color={COLORS.black_200}>No Samples Available</Text>
+            // </View>
           )}
         </VStack>
 

@@ -68,26 +68,29 @@ export const deleteGroupData = async (db: any, isSelectedGroup: CreateGroupItems
   const doc = await db.get(GroupListDoc);
   // Find the index of the item you want to update
   const itemIndex = doc.items.findIndex((item: CreateGroupItems) => item.group_id === isSelectedGroup.group_id);
-  
-  await db.get(GroupByFarmListDoc)
-  .then((doc: any) => {
-    doc.items = doc.items.filter((item: ReportByFarmItems) => 
-    item.group_id !== isSelectedGroup.group_id);
-    // Save the updated document back to the database
-    return db.put(doc);
-  })
-
-  await db.get(ReportByFarm)
-  .then((doc: any) => {
-    doc.items = doc.items.filter((item: ReportByFarmItems) => 
-    !(item.group_id === isSelectedGroup.group_id));
-    // Save the updated document back to the database
-    return db.put(doc);
-  })
 
   // If the item exists, remove it from the array and save the updated document
   if (itemIndex >= 0) {
     doc.items.splice(itemIndex, 1);
+    
+  const farmDoc = await db.get(GroupByFarmListDoc).catch((err: any) => {
+    console.log('err', err)
+  })
+  if(farmDoc?.items?.length){
+    farmDoc.items = farmDoc.items.filter((item: ReportByFarmItems) => 
+    item.group_id !== isSelectedGroup.group_id);
+    // Save the updated document back to the database
+    return db.put(farmDoc);
+  }
+
+  const reportDoc = await db.get(ReportByFarm).catch((err: any) => {
+    console.log('err', err)
+  })
+  if(reportDoc?.items){
+    reportDoc.items = reportDoc.items.filter((item: ReportByFarmItems) => 
+  !(item.group_id === isSelectedGroup.group_id));
+  return db.put(reportDoc);
+  }
     return await db.put(doc);
   } else {
     console.log(`Item with id 'item2' not found in document '${GroupListDoc}'.`);
@@ -145,20 +148,20 @@ export const deleteFarmData = async (db: any, isSelectedFarmItem: CreateFarmsIte
   const doc = await db.get(GroupByFarmListDoc);
   // Find the index of the item you want to update
   const itemIndex = doc.items.findIndex((item: CreateFarmsItems) => item.farm_id === isSelectedFarmItem.farm_id);
-  
-  await db.get(ReportByFarm)
-  .then((doc: any) => {
-    doc.items = doc.items.filter((item: ReportByFarmItems) => 
-    !(item.farm_id === isSelectedFarmItem.farm_id 
-      && item.group_id === isSelectedFarmItem.group_id));
-
-    // Save the updated document back to the database
-    return db.put(doc);
-  })
 
   // If the item exists, remove it from the array and save the updated document
   if (itemIndex >= 0) {
     doc.items.splice(itemIndex, 1);
+    const reportDoc = await db.get(ReportByFarm).catch((err: any) => {
+      console.log('err', err)
+    })
+      if(reportDoc?.items){
+        reportDoc.items = reportDoc.items.filter((item: ReportByFarmItems) => 
+      !(item.farm_id === isSelectedFarmItem.farm_id 
+        && item.group_id === isSelectedFarmItem.group_id));
+      // Save the updated document back to the database
+      return db.put(reportDoc);
+      }
     return await db.put(doc);
   } else {
     console.log(`Item not found in document '${GroupByFarmListDoc}'.`);
