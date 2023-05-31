@@ -46,6 +46,7 @@
     android:icon="@drawable/app_logo"
     android:roundIcon="@drawable/app_logo"
     android:requestLegacyExternalStorage="true"
+    android:usesCleartextTraffic="true"
     android:allowBackup="false"
     android:largeHeap="true"
     android:theme="@style/AppTheme"
