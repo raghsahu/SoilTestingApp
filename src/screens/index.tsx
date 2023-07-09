@@ -5,6 +5,7 @@ import Home from './Home'
 import Profile from './Profile'
 import EditProfile from './EditProfile'
 import GroupItemDetails from './GroupItemDetails'
+import AddNewReport from './AddNewReport'
 
 export {
     Splash,
@@ -14,4 +15,5 @@ export {
     Profile,
     EditProfile,
     GroupItemDetails,
+    AddNewReport,
 };

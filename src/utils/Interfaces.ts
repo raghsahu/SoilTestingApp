@@ -2,7 +2,8 @@ import { CreateFarmsItems, CreateGroupItems, ReportByFarmItems } from "../databa
 
 export interface GroupTabItemInterface {
     item: CreateGroupItems,
-    isSelectedGroup: any,
+    isSelectedGroup: CreateGroupItems,
+    isFarmReport?: boolean,
     onTabClick?: () => void,
     onTabLongClick?: () => void,
 }
@@ -105,6 +106,7 @@ export interface ReportListItemInterface {
     item: ReportByFarmItems,
     isCollectingSamplePage?: boolean,
     isSelectedFarmItem?: ReportByFarmItems,
+    collectingSampleText?: string,
     onItemClick?: () => void,
 }
 

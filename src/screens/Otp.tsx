@@ -13,13 +13,14 @@ import { UserInterface } from '../utils/Interfaces';
 const Otp = (props: any) => {
     const {mobileNo, verificationId} = props.route?.params;
     const [verificationCode, setVerificationCode] = useState('');
+    const [otpVerificationId, setOtpVerificationId] = useState(verificationId);
     const [isLoading, setIsLoading] = useState(false);
 
     const handleVerificationCodeSubmit = async () => {
         setIsLoading(true);
         try {
             const credential = firebase.auth.PhoneAuthProvider.credential(
-              verificationId,
+              otpVerificationId,
               verificationCode,
             );
            const verifyRes = await firebase.auth().signInWithCredential(credential);
@@ -49,6 +50,23 @@ const Otp = (props: any) => {
           }
       };
 
+      const resendOtp = async () => {
+        setIsLoading(true);
+        try {
+          const phoneNumberWithCode = mobileNo; // Include country code
+          const confirmation: any = await firebase.auth().signInWithPhoneNumber(phoneNumberWithCode);
+         if(confirmation?._verificationId){
+           setIsLoading(false);
+           setOtpVerificationId(confirmation?._verificationId);
+           showToast('Otp resend successfully')
+         }
+        } catch (error) {
+          console.log(error);
+          showToast('' + error)
+          setIsLoading(false);
+        }
+      };
+
     return (
         <View style={styles.container}>
             <Statusbar />
@@ -64,6 +82,7 @@ const Otp = (props: any) => {
                         source={IMAGES.BackIcon}
                         marginTop={5}
                     />
+                    
                 </TouchableOpacity>
                 <Text fontFamily={'Poppins-Regular'} height={100} fontStyle={'normal'} marginTop={20} fontWeight={500} fontSize={33} color={COLORS.black_400} textAlign={'left'}>Enter OTP </Text>
                 <VStack marginTop={'30%'}>
@@ -89,6 +108,13 @@ const Otp = (props: any) => {
                             handleVerificationCodeSubmit();
                         }}
                     />
+                    <TouchableOpacity
+                        onPress={() => {
+                            resendOtp();
+                        }}
+                    >
+                        <Text fontFamily={'Poppins-Regular'} fontStyle={'normal'} marginTop={5} fontWeight={500} fontSize={14} color={COLORS.black_400} textAlign={'center'}>Resend OTP</Text>
+                    </TouchableOpacity>
                 </VStack>
             </VStack>
             {isLoading && <ActivityIndicator size="large" color={COLORS.brown_500} />}

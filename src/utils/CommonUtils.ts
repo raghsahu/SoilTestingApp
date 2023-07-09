@@ -137,7 +137,7 @@ export const getSeparatedValues = async (uniqueArray: any[])=> {
       } else if (item.includes('MOIS=') || item.includes('OIS=')) {
         allSevenValues.mois = item.split("=")[1]
       } else if (item.includes('PH=') || item.includes('H=')) {
-        allSevenValues.ph = item.split("=")[1]
+        allSevenValues.ph = (item.split("=")[1] / 10).toString();
       } else if (item.includes('NITROGEN=') || item.includes('ITROGEN=')) {
         allSevenValues.nitrogen = item.split("=")[1]
       } else if (item.includes('COND=') || item.includes('OND=')) {

@@ -4,10 +4,13 @@ import { COLORS } from "../assets"
 import { GroupTabItemInterface } from "../utils/Interfaces";
 
 const GroupTabItem = (props: GroupTabItemInterface) => {
-    const { item, isSelectedGroup, onTabClick, onTabLongClick } = props;
+    const { item, isSelectedGroup, isFarmReport, onTabClick, onTabLongClick } = props;
 
     const getBgColors = () => {
         if (isSelectedGroup.group_id === item.group_id) {
+            if (isFarmReport) {
+                return COLORS.brown_400;
+            }
             return COLORS.brown_500;
         }
         else {
@@ -26,13 +29,18 @@ const GroupTabItem = (props: GroupTabItemInterface) => {
     return (
         <TouchableOpacity
             style={{
-                height: 40,
+                height: 34,
                 margin: 5,
-                width: 83,
+                //width: 'auto',
+                flexWrap: 'wrap',
+                paddingLeft: 4,
+                paddingRight: 4,
                 backgroundColor: getBgColors(),
                 borderRadius: 8,
                 justifyContent: 'center',
-                alignItems: 'center'
+                alignItems: 'center',
+                alignContent: 'center',
+                alignSelf: 'center',
             }}
             onPress={() => {
                 onTabClick && onTabClick();
@@ -43,7 +51,11 @@ const GroupTabItem = (props: GroupTabItemInterface) => {
         >
             <Text
                 style={{
-                    color: getTextColors()
+                    color: getTextColors(),
+                    flex: 1,
+                    alignSelf: 'center',
+                    justifyContent: 'center',
+                    textAlignVertical: 'center',
                 }}
             >
                 {item.group_name}

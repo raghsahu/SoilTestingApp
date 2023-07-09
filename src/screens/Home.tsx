@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 //ASSETS
-import { COLORS, IMAGES } from '../assets';
+import {COLORS, IMAGES} from '../assets';
 import {
   ActivityIndicator,
   Alert,
@@ -10,19 +10,24 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
-import { VStack, Text, View, HStack, Image, ScrollView, FlatList } from 'native-base';
-import { Button, Statusbar, Header, GroupTabItem } from '../components';
-import { BarChart } from 'react-native-gifted-charts';
 import {
-  getGraphReportData,
-} from '../utils/GraphData';
+  VStack,
+  Text,
+  View,
+  HStack,
+  Image,
+  ScrollView,
+  FlatList,
+} from 'native-base';
+import {Button, Statusbar, Header, GroupTabItem} from '../components';
+import {BarChart} from 'react-native-gifted-charts';
+import {getGraphReportData} from '../utils/GraphData';
 import GroupByItemList from '../components/GroupByItemList';
 import AddNewGroupModal from '../components/AddNewGroupModal';
 import UpdateGroupModal from '../components/UpdateGroupModal';
 import AddNewFarmModal from '../components/AddNewFarmModal';
 import {
   AsyncKey,
-  GetAllPermissions,
   dateFormatToDDMMYYYY,
   dateFormatToUTC,
   endDateFormatToUTC,
@@ -49,19 +54,19 @@ import {
   CreateGroupItems,
   ReportByFarmItems,
 } from '../database/Interfaces';
-import { useFocusEffect } from '@react-navigation/native';
+import {useFocusEffect} from '@react-navigation/native';
 import {
   GraphBarDataInterface,
   GraphSingleData,
   USBDeviceInterface,
   UserInterface,
 } from '../utils/Interfaces';
-import { Codes, UsbSerialManager } from '../usbSerialModule';
+import {UsbSerialManager} from '../usbSerialModule';
 import StartEndDatePicker from '../components/StartEndDatePicker';
-import { SwiperFlatList } from 'react-native-swiper-flatlist';
+import {SwiperFlatList} from 'react-native-swiper-flatlist';
 import PercentageBar from '../components/PercentageBar';
-import { BleManager, Device } from 'react-native-ble-plx';
-import { deviceName } from '../utils/Ble_UART_At_Command';
+import {BleManager, Device} from 'react-native-ble-plx';
+import {deviceName} from '../utils/Ble_UART_At_Command';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const manager = new BleManager();
@@ -89,6 +94,7 @@ const Home = (props: any) => {
     connectedBleDevice: {} as any,
     connectedUsbDevice: {} as USBDeviceInterface,
     isConnectedBy: '' as string,
+    isFarmReport: false,
   });
 
   useEffect(() => {
@@ -105,30 +111,17 @@ const Home = (props: any) => {
   }, []);
 
   useEffect(() => {
-    checkUsbSerial();
+    checkBleSerial();
     getAllGroupLists();
-  }, [props]);
+  }, []);
 
   // Refresh data on focus
   useFocusEffect(
     useCallback(() => {
-      if (state.isSelectedGroup?.group_id) {
-        setState((prev) => {
-          return {
-            ...prev,
-            isFarmLoading: true,
-          };
-        });
-        fetchGroupByFarmList(state.isSelectedGroup?.group_id);
-      }
-      getAllReportByDate(state.filterByToDate, state.filterByFromDate);
       getProfileDataFromLocalStorage();
     }, [props])
   );
 
-  const checkUsbSerial = async () => {
-    checkBleSerial();
-  };
   const checkBleSerial = async () => {
     // Subscribe to BLE state changes
     const subscription = manager.onStateChange(async (state) => {
@@ -240,6 +233,7 @@ const Home = (props: any) => {
       return {
         ...prev,
         isReportLoading: true,
+        isFarmReport: false,
       };
     });
     const allReportRes = await fetchAllReportDataByDate(db, toDate, fromDate);
@@ -322,6 +316,7 @@ const Home = (props: any) => {
   const fetchGroupByFarmList = async (group_id: number) => {
     const allFarmRes = await fetchAllFarmByGroupList(db, group_id);
     if (allFarmRes?.length) {
+      state.groupByFarmList = allFarmRes;
       setState((prev) => {
         return {
           ...prev,
@@ -522,6 +517,7 @@ const Home = (props: any) => {
           allGraphReportData: allGraphReportData.allSeparateGraph,
           allInOneReportData: allGraphReportData.allInOneGraph,
           isReportLoading: false,
+          isFarmReport: true,
         };
       });
     } else {
@@ -531,13 +527,14 @@ const Home = (props: any) => {
           isReportLoading: false,
           reportByFarmList: [],
           allGraphReportData: [],
+          isFarmReport: false,
         };
       });
     }
   };
 
   const getAllReportByGroup = async (
-    groupData: CreateGroupItems,
+    group_id: number,
     toDate: string,
     fromDate?: string
   ) => {
@@ -549,7 +546,7 @@ const Home = (props: any) => {
     });
     const allReportRes = await fetchAllReportDataByGroup(
       db,
-      groupData.group_id,
+      group_id,
       toDate,
       fromDate
     );
@@ -575,6 +572,35 @@ const Home = (props: any) => {
     }
   };
 
+  const onRefreshFarm = (data: CreateFarmsItems) => {
+    if (state.isSelectedGroup?.group_id) {
+      state.groupByFarmList = [];
+      setState((prev) => {
+        return {
+          ...prev,
+          isFarmLoading: true,
+          groupByFarmList: [] as CreateFarmsItems[],
+        };
+      });
+      fetchGroupByFarmList(data.group_id);
+      getAllReportByGroup(
+        data.group_id,
+        state.filterByToDate,
+        state.filterByFromDate
+      );
+      console.log('rrr33 ', state.isSelectedGroup, data.group_id);
+    }
+  };
+
+  const openCollectFarm = async (item: CreateFarmsItems) => {
+    props.navigation.navigate('GroupItemDetails', {
+      farmData: item,
+      onGoBack: (data: CreateFarmsItems) => {
+        onRefreshFarm(data);
+      },
+    });
+  };
+
   return (
     <View style={styles.container}>
       <Statusbar />
@@ -588,14 +614,14 @@ const Home = (props: any) => {
             //props.navigation.navigate('Login');
           }}
           onHeaderLabelClick={() => {
-            checkUsbSerial();
+            checkBleSerial();
           }}
           label={
             state.connectedBleDevice?.name
               ? 'Device: ' + state.connectedBleDevice?.name
               : state.connectedUsbDevice?.deviceId
-                ? 'Device Id: ' + state.connectedUsbDevice?.deviceId
-                : 'No Device Connected'
+              ? 'Device Id: ' + state.connectedUsbDevice?.deviceId
+              : 'No Device Connected'
           }
         ></Header>
         <VStack marginLeft={5} marginRight={5}>
@@ -610,14 +636,14 @@ const Home = (props: any) => {
               fontWeight={600}
               fontFamily={'Poppins-Regular'}
               color={COLORS.black_400}
-              style={{ alignSelf: 'center', justifyContent: 'center' }}
+              style={{alignSelf: 'center', justifyContent: 'center'}}
             >
               {'Soil Report'}
             </Text>
-            {state.groupTabList?.length ?
+            {state.groupTabList?.length ? (
               <HStack>
                 <TouchableOpacity
-                  style={{ justifyContent: 'center', alignItems: 'center' }}
+                  style={{justifyContent: 'center', alignItems: 'center'}}
                   onPress={() => {
                     setState((prev) => {
                       return {
@@ -639,10 +665,11 @@ const Home = (props: any) => {
                         justifyContent: 'center',
                       }}
                     >
-                      {`${dateFormatToDDMMYYYY(state.filterByToDate)} ${state.filterByFromDate
-                        ? '-' + dateFormatToDDMMYYYY(state.filterByFromDate)
-                        : ''
-                        }`}
+                      {`${dateFormatToDDMMYYYY(state.filterByToDate)} ${
+                        state.filterByFromDate
+                          ? '-' + dateFormatToDDMMYYYY(state.filterByFromDate)
+                          : ''
+                      }`}
                     </Text>
 
                     <Image
@@ -671,15 +698,13 @@ const Home = (props: any) => {
                   />
                 </TouchableOpacity>
               </HStack>
-              : <></>}
+            ) : (
+              <></>
+            )}
           </HStack>
 
           {state.isReportLoading ? (
-            <View
-              height={323}
-              justifyContent={'center'}
-              alignItems={'center'}
-            >
+            <View height={323} justifyContent={'center'} alignItems={'center'}>
               <ActivityIndicator size="large" color={COLORS.brown_500} />
             </View>
           ) : state.isAllInOneGraphOpen ? (
@@ -725,22 +750,24 @@ const Home = (props: any) => {
                 <Image
                   height={131}
                   width={182}
-                  source={state.groupTabList?.length === 0 ? IMAGES.NoGroupDataIcon :
-                    IMAGES.NoReportsDataIcon}
+                  source={
+                    state.groupTabList?.length === 0
+                      ? IMAGES.NoGroupDataIcon
+                      : IMAGES.NoReportsDataIcon
+                  }
                   alignSelf={'center'}
                 />
                 <View
-                  justifyContent={'center'} alignItems={'center'}
+                  justifyContent={'center'}
+                  alignItems={'center'}
                   justifyItems={'center'}
                   alignSelf={'center'}
                   width={'80%'}
                 >
-                  <Text m={5} color={COLORS.black_200}
-                  >
-                    {state.groupTabList?.length === 0 ?
-                      `No data available, Please add groups and farms to start` :
-                      `No reports available, Connect your device and start testing soil in seconds!`
-                    }
+                  <Text m={5} color={COLORS.black_200}>
+                    {state.groupTabList?.length === 0
+                      ? `No data available, Please add groups and farms to start`
+                      : `No reports available, Connect your device and start testing soil in seconds!`}
                   </Text>
                 </View>
               </View>
@@ -752,7 +779,9 @@ const Home = (props: any) => {
                   <View
                     justifyContent={'center'}
                     height={323}
-                    backgroundColor={COLORS.brown_400}
+                    backgroundColor={
+                      state.isFarmReport ? COLORS.white : COLORS.brown_400
+                    }
                     mt={5}
                     borderRadius={16}
                     width={355}
@@ -764,11 +793,12 @@ const Home = (props: any) => {
                       fontSize={16}
                       fontWeight={500}
                       fontFamily={'Poppins-Regular'}
-                      color={COLORS.white}
-                      style={{ marginLeft: 5, paddingLeft: 5 }}
+                      color={state.isFarmReport ? COLORS.black : COLORS.white}
+                      style={{marginLeft: 5, paddingLeft: 5}}
                     >
                       {item.graphHeader}
                     </Text>
+
                     <BarChart
                       barWidth={8}
                       //noOfSections={3}
@@ -779,7 +809,13 @@ const Home = (props: any) => {
                       xAxisThickness={0}
                       labelWidth={60}
                       width={305}
-                      xAxisLabelTextStyle={{ fontSize: 10 }}
+                      xAxisLabelTextStyle={{
+                        fontSize: 10,
+                        color: state.isFarmReport ? COLORS.black : COLORS.white,
+                      }}
+                      yAxisTextStyle={{
+                        color: state.isFarmReport ? COLORS.black : COLORS.white,
+                      }}
                     />
                   </View>
                 );
@@ -803,31 +839,33 @@ const Home = (props: any) => {
               <Image
                 height={131}
                 width={182}
-                source={state.groupTabList?.length ? IMAGES.NoGroupDataIcon :
-                  IMAGES.NoReportsDataIcon}
+                source={
+                  state.groupTabList?.length
+                    ? IMAGES.NoGroupDataIcon
+                    : IMAGES.NoReportsDataIcon
+                }
                 alignSelf={'center'}
               />
               <View
-                justifyContent={'center'} alignItems={'center'}
+                justifyContent={'center'}
+                alignItems={'center'}
                 justifyItems={'center'}
                 alignSelf={'center'}
                 width={'80%'}
               >
-                <Text m={5} color={COLORS.black_200}
-                >
-                  {state.groupTabList?.length ?
-                    `No data available, Please add groups and farms to start` :
-                    `No reports available, Connect your device and start testing soil in seconds!`
-                  }
+                <Text m={5} color={COLORS.black_200}>
+                  {state.groupTabList?.length
+                    ? `No data available, Please add groups and farms to start`
+                    : `No reports available, Connect your device and start testing soil in seconds!`}
                 </Text>
               </View>
             </View>
           )}
-          {state.groupTabList?.length > 0 &&
+          {state.groupTabList?.length > 0 && (
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              style={{ marginTop: 10 }}
+              style={{marginTop: 10}}
             >
               {state.groupTabList?.length > 0 &&
                 state.groupTabList?.map((item: CreateGroupItems) => {
@@ -835,6 +873,7 @@ const Home = (props: any) => {
                     <GroupTabItem
                       item={item}
                       isSelectedGroup={state.isSelectedGroup}
+                      isFarmReport={state.isFarmReport}
                       onTabClick={() => {
                         setState((prev) => {
                           return {
@@ -848,13 +887,15 @@ const Home = (props: any) => {
                               ...prev,
                               isFarmLoading: true,
                               isSelectedFarmItem: {} as CreateFarmsItems,
+                              isFarmReport: false,
                             };
                           });
                           fetchGroupByFarmList(item?.group_id);
                           getAllReportByGroup(
-                            item,
+                            item.group_id,
                             state.filterByToDate,
-                            state.filterByFromDate)
+                            state.filterByFromDate
+                          );
                         }
                       }}
                       onTabLongClick={() => {
@@ -871,13 +912,18 @@ const Home = (props: any) => {
                 })}
               <TouchableOpacity
                 style={{
-                  height: 40,
+                  height: 34,
                   margin: 5,
-                  width: 83,
+                  //width: 'auto',
+                  flexWrap: 'wrap',
+                  paddingLeft: 4,
+                  paddingRight: 4,
                   backgroundColor: COLORS.brown_300,
                   borderRadius: 8,
                   justifyContent: 'center',
                   alignItems: 'center',
+                  alignContent: 'center',
+                  alignSelf: 'center',
                 }}
                 onPress={() => {
                   setState((prev) => {
@@ -891,20 +937,19 @@ const Home = (props: any) => {
                 <Text
                   style={{
                     color: COLORS.white,
+                    flex: 1,
+                    alignSelf: 'center',
+                    justifyContent: 'center',
+                    textAlignVertical: 'center',
                   }}
                 >
                   {'Add New'}
                 </Text>
               </TouchableOpacity>
             </ScrollView>
-          }
-          {state.groupTabList?.length === 0 &&
-            <View
-              flex={1}
-              mb={10}
-              mt={100}
-              width={'100%'}
-            >
+          )}
+          {state.groupTabList?.length === 0 && (
+            <View flex={1} mb={10} mt={100} width={'100%'}>
               <Button
                 text={'Create Group'}
                 style={{
@@ -922,7 +967,7 @@ const Home = (props: any) => {
                 }}
               />
             </View>
-          }
+          )}
           {state.isFarmLoading ? (
             <View justifyContent={'center'} alignItems={'center'}>
               <ActivityIndicator size="large" color={COLORS.brown_500} />
@@ -931,24 +976,28 @@ const Home = (props: any) => {
             <View height={330}>
               <FlatList
                 data={state.groupByFarmList}
-                renderItem={({ item }) => {
+                renderItem={({item}) => {
                   return (
                     <GroupByItemList
                       item={item}
                       isSelectedFarmItem={state.isSelectedFarmItem}
                       onItemClick={() => {
-                        setState((prev) => {
-                          return {
-                            ...prev,
-                            isSelectedFarmItem: item,
-                          };
-                        });
-                        if (item.sampleCount > 1) {
-                          getAllReportByFarmLists(
-                            item,
-                            state.filterByToDate,
-                            state.filterByFromDate
-                          );
+                        if (!item.sampleCount) {
+                          openCollectFarm(item);
+                        } else {
+                          setState((prev) => {
+                            return {
+                              ...prev,
+                              isSelectedFarmItem: item,
+                            };
+                          });
+                          if (item.sampleCount > 0) {
+                            getAllReportByFarmLists(
+                              item,
+                              state.filterByToDate,
+                              state.filterByFromDate
+                            );
+                          }
                         }
                       }}
                       onEditClick={() => {
@@ -960,32 +1009,8 @@ const Home = (props: any) => {
                           };
                         });
                       }}
-                      onItemPlusClick={async () => {
-                        if (Platform.OS === 'android') {
-                          const devices = await UsbSerialManager.list();
-                          if (devices?.length) {
-                            try {
-                              const deviceId = devices?.[0]?.deviceId;
-                              await UsbSerialManager.tryRequestPermission(
-                                deviceId
-                              );
-                              props.navigation.navigate('GroupItemDetails', {
-                                farmData: item,
-                              });
-                            } catch (err) {
-                              console.log('err', err);
-                            }
-                          } else {
-                            await GetAllPermissions();
-                            props.navigation.navigate('GroupItemDetails', {
-                              farmData: item,
-                            });
-                          }
-                        } else {
-                          props.navigation.navigate('GroupItemDetails', {
-                            farmData: item,
-                          });
-                        }
+                      onItemPlusClick={() => {
+                        openCollectFarm(item);
                       }}
                       onDeleteClick={() => {
                         openConfirmationAlert(
@@ -994,7 +1019,7 @@ const Home = (props: any) => {
                         );
                       }}
                     />
-                  )
+                  );
                 }}
                 keyExtractor={(item, index) => index + item.farm_id + ''}
               />
