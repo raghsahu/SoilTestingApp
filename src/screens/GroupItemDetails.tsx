@@ -25,18 +25,15 @@ import {
   GraphBarDataInterface,
   GraphSingleData,
   USBDeviceInterface,
-  UserInterface,
 } from '../utils/Interfaces';
 import {CreateFarmsItems, ReportByFarmItems} from '../database/Interfaces';
 import {
   fetchAllReportDataByFarm,
-  fetchSamplesCountByFarm,
   initializeSoilDb,
   updateFarmData,
 } from '../database/SoilAppDB';
 import ReportByFarmItemList from '../components/ReportByFarmItems';
 import StartEndDatePicker from '../components/StartEndDatePicker';
-import {useFocusEffect} from '@react-navigation/native';
 import SwiperFlatList from 'react-native-swiper-flatlist';
 import PercentageBar from '../components/PercentageBar';
 import {UsbSerialManager} from '../usbSerialModule';
@@ -58,6 +55,7 @@ const GroupItemDetails = (props: any) => {
     filterByFromDate: '',
     openDatePicker: false,
     isAllInOneGraphOpen: true,
+    isFarmReport: false,
   });
 
   useEffect(() => {
@@ -82,6 +80,8 @@ const GroupItemDetails = (props: any) => {
       return {
         ...prev,
         isFarmLoading: true,
+        isFarmReport: false,
+        isSelectedFarmItem: {} as ReportByFarmItems,
       };
     });
     const allReportRes = await fetchAllReportDataByFarm(
@@ -121,6 +121,7 @@ const GroupItemDetails = (props: any) => {
         ...prev,
         allGraphReportData: allGraphReportData.allSeparateGraph,
         allInOneReportData: allGraphReportData.allInOneGraph,
+        isFarmReport: true,
       };
     });
   };
@@ -337,7 +338,30 @@ const GroupItemDetails = (props: any) => {
                   </View>
                 </View>
               )
-            ) : state.allGraphReportData?.length > 0 ? (
+            ) : state.isFarmReport ? 
+            <View
+                justifyContent={'center'}
+                height={323}
+                width={355}
+                backgroundColor={COLORS.white}
+                ml={2}
+                mr={2}
+                borderRadius={16}
+              >
+                <BarChart
+                  width={305}
+                  barWidth={8}
+                  barBorderRadius={4}
+                  frontColor="lightgray"
+                  data={state.allInOneReportData?.graphData}
+                  yAxisThickness={0}
+                  xAxisThickness={0}
+                  labelWidth={90}
+                  xAxisLabelTextStyle={{fontSize: 10}}
+                />
+              </View>
+            :
+            state.allGraphReportData?.length > 0 ? (
               <SwiperFlatList index={0}>
                 {state.allGraphReportData?.map((item: any) => {
                   return (

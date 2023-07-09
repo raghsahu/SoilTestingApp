@@ -80,6 +80,7 @@ const Otp = (props: any) => {
                         height={'20px'}
                         width={'20px'}
                         source={IMAGES.BackIcon}
+                        resizeMode="contain"
                         marginTop={5}
                     />
                     
