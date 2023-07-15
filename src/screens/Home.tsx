@@ -52,7 +52,6 @@ import {
 import {
   CreateFarmsItems,
   CreateGroupItems,
-  ReportByFarmItems,
 } from '../database/Interfaces';
 import {useFocusEffect} from '@react-navigation/native';
 import {
@@ -293,8 +292,14 @@ const Home = (props: any) => {
           openAddNewFarmModal: state.isFirstGroupCreated,
         };
       });
-
-      fetchGroupByFarmList(
+      getAllReportByGroup(
+        state.isSelectedGroup?.group_id
+            ? state.isSelectedGroup.group_id
+            : allGroupRes[0].group_id,
+        state.filterByToDate,
+        state.filterByFromDate
+      );
+      fetchFarmByGroupList(
         state.isSelectedGroup?.group_id
           ? state.isSelectedGroup?.group_id
           : allGroupRes[0]?.group_id
@@ -313,7 +318,7 @@ const Home = (props: any) => {
     }
   };
 
-  const fetchGroupByFarmList = async (group_id: number) => {
+  const fetchFarmByGroupList = async (group_id: number) => {
     const allFarmRes = await fetchAllFarmByGroupList(db, group_id);
     if (allFarmRes?.length) {
       state.groupByFarmList = allFarmRes;
@@ -439,7 +444,7 @@ const Home = (props: any) => {
             isSelectedFarmItem: {} as CreateFarmsItems,
           };
         });
-        fetchGroupByFarmList(state.isSelectedGroup?.group_id);
+        fetchFarmByGroupList(state.isSelectedGroup?.group_id);
         getAllReportByDate(state.filterByToDate, state.filterByFromDate);
       }
     } catch (err) {
@@ -481,7 +486,7 @@ const Home = (props: any) => {
             showToast('Farm updated successfully');
           }
         }
-        fetchGroupByFarmList(state.isSelectedGroup?.group_id);
+        fetchFarmByGroupList(state.isSelectedGroup?.group_id);
       } catch (err) {
         console.error(err);
       }
@@ -582,13 +587,12 @@ const Home = (props: any) => {
           groupByFarmList: [] as CreateFarmsItems[],
         };
       });
-      fetchGroupByFarmList(data.group_id);
+      fetchFarmByGroupList(data.group_id);
       getAllReportByGroup(
         data.group_id,
         state.filterByToDate,
         state.filterByFromDate
       );
-      console.log('rrr33 ', state.isSelectedGroup, data.group_id);
     }
   };
 
@@ -631,15 +635,30 @@ const Home = (props: any) => {
             justifyContent={'space-between'}
             alignContent={'center'}
           >
-            <Text
-              fontSize={16}
-              fontWeight={600}
-              fontFamily={'Poppins-Regular'}
-              color={COLORS.black_400}
-              style={{alignSelf: 'center', justifyContent: 'center'}}
-            >
-              {'Soil Report'}
-            </Text>
+            <VStack>
+              <Text
+                fontSize={16}
+                fontWeight={600}
+                fontFamily={'Poppins-Regular'}
+                color={COLORS.black_400}
+                style={{alignSelf: 'center', justifyContent: 'center'}}
+              >
+                {'Soil Report'}
+              </Text>
+              <Text
+                fontSize={12}
+                fontWeight={500}
+                fontFamily={'Poppins-Regular'}
+                color={COLORS.black_300}
+                style={{
+                  paddingRight: 5,
+                  alignSelf: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                {state.isSelectedGroup.group_name + `${state.isSelectedFarmItem.farm_name ? ' - ' +  state.isSelectedFarmItem.farm_name : ''}`}
+              </Text>
+            </VStack>
             {state.groupTabList?.length ? (
               <HStack>
                 <TouchableOpacity
@@ -680,23 +699,39 @@ const Home = (props: any) => {
                   </HStack>
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={styles.graphIconBg}
-                  onPress={() => {
-                    setState((prev) => {
-                      return {
-                        ...prev,
-                        isAllInOneGraphOpen: !state.isAllInOneGraphOpen,
-                      };
-                    });
-                  }}
-                >
-                  <Image
-                    style={styles.graphIcon}
-                    source={IMAGES.GraphIcon}
-                    resizeMode="contain"
-                  />
-                </TouchableOpacity>
+                {state.allGraphReportData?.length ? (
+                  <TouchableOpacity
+                    disabled={state.allGraphReportData?.length ? false : true}
+                    style={[
+                      styles.graphIconBg,
+                      {
+                        backgroundColor: state.allGraphReportData?.length
+                          ? COLORS.brown_400
+                          : COLORS.brown_300,
+                      },
+                    ]}
+                    onPress={() => {
+                      setState((prev) => {
+                        return {
+                          ...prev,
+                          isAllInOneGraphOpen: !state.isAllInOneGraphOpen,
+                        };
+                      });
+                    }}
+                  >
+                    <Image
+                      style={styles.graphIcon}
+                      source={
+                        state.isAllInOneGraphOpen
+                          ? IMAGES.GraphIcon
+                          : IMAGES.GraphVerticalIcon
+                      }
+                      resizeMode="contain"
+                    />
+                  </TouchableOpacity>
+                ) : (
+                  <></>
+                )}
               </HStack>
             ) : (
               <></>
@@ -712,8 +747,9 @@ const Home = (props: any) => {
               <View
                 justifyContent={'center'}
                 height={323}
-                backgroundColor={COLORS.brown_400}
-                mt={5}
+                backgroundColor={
+                  state.isFarmReport ? COLORS.white : COLORS.brown_400
+                }
                 borderRadius={16}
                 width={355}
                 ml={2}
@@ -724,6 +760,9 @@ const Home = (props: any) => {
                     return (
                       <PercentageBar
                         height={8}
+                        labelColor={
+                          state.isFarmReport ? COLORS.black : COLORS.white
+                        }
                         backgroundColor={COLORS.brown_200}
                         completedColor={COLORS.brown_300}
                         item={item}
@@ -777,12 +816,12 @@ const Home = (props: any) => {
               {state.allGraphReportData?.map((item: any) => {
                 return (
                   <View
-                    justifyContent={'center'}
-                    height={323}
+                    //justifyContent={'center'}
+                    height={330}
                     backgroundColor={
                       state.isFarmReport ? COLORS.white : COLORS.brown_400
                     }
-                    mt={5}
+                    mt={2}
                     borderRadius={16}
                     width={355}
                     ml={2}
@@ -790,6 +829,7 @@ const Home = (props: any) => {
                   >
                     <Text
                       mb={2}
+                      mt={2}
                       fontSize={16}
                       fontWeight={500}
                       fontFamily={'Poppins-Regular'}
@@ -807,8 +847,9 @@ const Home = (props: any) => {
                       data={item.graphData}
                       yAxisThickness={0}
                       xAxisThickness={0}
-                      labelWidth={60}
+                      labelWidth={40}
                       width={305}
+                      rotateLabel={true}
                       xAxisLabelTextStyle={{
                         fontSize: 10,
                         color: state.isFarmReport ? COLORS.black : COLORS.white,
@@ -890,7 +931,7 @@ const Home = (props: any) => {
                               isFarmReport: false,
                             };
                           });
-                          fetchGroupByFarmList(item?.group_id);
+                          fetchFarmByGroupList(item?.group_id);
                           getAllReportByGroup(
                             item.group_id,
                             state.filterByToDate,
@@ -1177,7 +1218,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   graphIconBg: {
-    backgroundColor: COLORS.brown_400,
     height: 32,
     width: 32,
     borderRadius: 16,

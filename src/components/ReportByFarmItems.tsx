@@ -50,7 +50,7 @@ const ReportByFarmItemList = (props: ReportListItemInterface) => {
         margin: 5,
         //backgroundColor: getBgColors(item),
         borderRadius: 8,
-        height: 115,
+        height: 85,
       }}
       //swipeContainerStyle={styles.swipeContentContainerStyle}
       // leftButtons={props?.isCollectingSamplePage ? undefined : (isSelectedFarmItem?.farm_id === item.farm_id) ? leftButton : undefined}
@@ -77,18 +77,8 @@ const ReportByFarmItemList = (props: ReportListItemInterface) => {
             }
             showGalleryIcon={item?.farm_image?.length ? false : true}
           />
-          {/* <ImageBackground
-                            style={styles.profileImage}
-                            source={IMAGES.GrayBgIcon}
-                        >
-                            <Image
-                                style={styles.editProfileIcon}
-                                source={IMAGES.TomatoIcon}
-                                resizeMode="contain"
-                            />
-                        </ImageBackground> */}
 
-          <VStack padding={5} flex={0.8}>
+          <VStack padding={2} flex={0.8}>
             <HStack>
               <Text
                 fontFamily={'Poppins-Regular'}
@@ -99,30 +89,6 @@ const ReportByFarmItemList = (props: ReportListItemInterface) => {
               >
                 {item.farm_name}
               </Text>
-
-              {/* <View
-                                    style={{
-                                        backgroundColor: 'red',
-                                        borderRadius: 12,
-                                        height: 24,
-                                        width: 24,
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        marginLeft: 5,
-                                    }}
-                                >
-                                    <Text
-                                        fontFamily={'Poppins-Regular'}
-                                        fontStyle={'normal'}
-                                        fontWeight={600}
-                                        fontSize={14}
-                                        color={COLORS.white}
-                                        alignSelf={'center'}
-                                        textAlign={'center'}
-                                    >
-                                        2
-                                    </Text>
-                                </View> */}
             </HStack>
             <Text
               fontFamily={'Poppins-Regular'}
@@ -176,9 +142,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
   },
   profileImage: {
-    height: 80,
-    width: 80,
-    borderRadius: 40,
+    height: 60,
+    width: 60,
+    borderRadius: 30,
     justifyContent: 'center',
     alignContent: 'center',
     alignSelf: 'center',

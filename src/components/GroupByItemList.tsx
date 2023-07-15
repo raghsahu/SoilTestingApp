@@ -39,7 +39,6 @@ const GroupByItemList = (props: GroupListItemInterface) => {
                 alignSelf: 'center',
                 aspectRatio: 1,
                 flexDirection: 'row',
-                // padding: 5,
             }}
 
         >
@@ -48,7 +47,9 @@ const GroupByItemList = (props: GroupListItemInterface) => {
                     justifyContent: 'center',
                     alignContent: 'center',
                     alignSelf: 'center',
-                    backgroundColor: '#FF02024A', width: 80, height: 54
+                    borderTopLeftRadius: 8,
+                    borderBottomLeftRadius: 8,
+                    backgroundColor: '#FF02024A', width: 80, height: 85
                 }}
                 onPress={() => props?.onDeleteClick && props?.onDeleteClick()}
             >
@@ -63,7 +64,9 @@ const GroupByItemList = (props: GroupListItemInterface) => {
                     justifyContent: 'center',
                     alignContent: 'center',
                     alignSelf: 'center',
-                    backgroundColor: '#1BA6044A', width: 80, height: 54,
+                    borderTopRightRadius: 8,
+                    borderBottomRightRadius: 8,
+                    backgroundColor: '#1BA6044A', width: 80, height: 85,
                 }}
                 onPress={() => {
                     props?.onEditClick && props?.onEditClick()
@@ -93,7 +96,8 @@ const GroupByItemList = (props: GroupListItemInterface) => {
                     justifyContent: 'center',
                     alignContent: 'center',
                     alignSelf: 'center',
-                    backgroundColor: '#1BA6044A', width: 80, height: 54,
+                    borderRadius: 8,
+                    backgroundColor: '#1BA6044A', width: 80, height: 85,
                 }}
                 onPress={() => {
                     onItemPlusClick && onItemPlusClick();
@@ -115,7 +119,7 @@ const GroupByItemList = (props: GroupListItemInterface) => {
                 margin: 5,
                 //backgroundColor: getBgColors(item),
                 borderRadius: 8,
-                height: 115,
+                height: 85,
             }}
             //swipeContainerStyle={styles.swipeContentContainerStyle}
             leftButtons={props?.isCollectingSamplePage ? undefined : (isSelectedFarmItem?.farm_id === item.farm_id) ? leftButton : undefined}
@@ -139,18 +143,8 @@ const GroupByItemList = (props: GroupListItemInterface) => {
                         source={item?.farm_image?.length ? { uri: `data:image/jpeg;base64,${item.farm_image}` } : IMAGES.GrayBgIcon}
                         showGalleryIcon={item?.farm_image?.length ? false : true}
                     />
-                    {/* <ImageBackground
-                            style={styles.profileImage}
-                            source={IMAGES.GrayBgIcon}
-                        >
-                            <Image
-                                style={styles.editProfileIcon}
-                                source={IMAGES.TomatoIcon}
-                                resizeMode="contain"
-                            />
-                        </ImageBackground> */}
 
-                    <VStack padding={5} flex={0.8}>
+                    <VStack padding={2} flex={0.85}>
                         <HStack >
                             <Text
                                 fontFamily={'Poppins-Regular'}
@@ -161,30 +155,6 @@ const GroupByItemList = (props: GroupListItemInterface) => {
                             >
                                 {item.farm_name}
                             </Text>
-
-                            {/* <View
-                                    style={{
-                                        backgroundColor: 'red',
-                                        borderRadius: 12,
-                                        height: 24,
-                                        width: 24,
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        marginLeft: 5,
-                                    }}
-                                >
-                                    <Text
-                                        fontFamily={'Poppins-Regular'}
-                                        fontStyle={'normal'}
-                                        fontWeight={600}
-                                        fontSize={14}
-                                        color={COLORS.white}
-                                        alignSelf={'center'}
-                                        textAlign={'center'}
-                                    >
-                                        2
-                                    </Text>
-                                </View> */}
                         </HStack>
                         <Text
                             fontFamily={'Poppins-Regular'}
@@ -195,7 +165,7 @@ const GroupByItemList = (props: GroupListItemInterface) => {
                         >
                             {item.farm_field}
                         </Text>
-                        <HStack marginTop={2}>
+                        <HStack marginTop={1}>
                             <Text
                                 fontFamily={'Poppins-Regular'}
                                 fontStyle={'normal'}
@@ -224,12 +194,12 @@ const GroupByItemList = (props: GroupListItemInterface) => {
                             backgroundColor={COLORS.brown_400}
                             borderTopLeftRadius={42}
                             borderBottomLeftRadius={42}
-                            width={42}
-                            height={'80%'}
+                            width={32}
+                            height={'90%'}
                             justifyContent={'center'}
                             alignContent={'center'}
                             alignSelf={'center'}
-                            flex={0.2}
+                            flex={0.15}
                             onPress={() => {
                                 onItemPlusClick && onItemPlusClick();
                             }}
@@ -253,9 +223,9 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.white,
     },
     profileImage: {
-        height: 80,
-        width: 80,
-        borderRadius: 40,
+        height: 60,
+        width: 60,
+        borderRadius: 23,
         justifyContent: 'center',
         alignContent: 'center',
         alignSelf: 'center',

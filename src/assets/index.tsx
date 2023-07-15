@@ -9,6 +9,7 @@ export const IMAGES = {
     UploadIcon: require('./images/uploadIcon.png'),
     GrayBgIcon: require('./images/grayBgIcon.png'),
     GraphIcon: require('./images/graphIcon.png'),
+    GraphVerticalIcon: require('./images/graph_vertical.png'),
     TomatoIcon: require('./images/tomato.png'),
     PlusIcon: require('./images/plusIcon.png'),
     DeleteIcon: require('./images/delete.png'),

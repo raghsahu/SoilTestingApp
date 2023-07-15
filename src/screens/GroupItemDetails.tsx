@@ -72,6 +72,7 @@ const GroupItemDetails = (props: any) => {
   }, []);
 
   useEffect(() => {
+    GetAllPermissions();
     getAllReportByFarmLists(state.filterByToDate, state.filterByFromDate);
   }, [props]);
 
@@ -176,9 +177,6 @@ const GroupItemDetails = (props: any) => {
                 props?.route?.params?.onGoBack?.(farmData);
               props.navigation.goBack();
             }}
-            onSettings={() => {
-              //props.navigation.navigate('Login');
-            }}
           ></Header>
 
           <VStack marginLeft={5} marginRight={5}>
@@ -188,7 +186,6 @@ const GroupItemDetails = (props: any) => {
               justifyContent={'space-between'}
               alignContent={'center'}
             >
-              <HStack>
                 <VStack>
                   <Text
                     fontSize={16}
@@ -212,7 +209,6 @@ const GroupItemDetails = (props: any) => {
                     {farmData.group_name + ' - ' + farmData.farm_name}
                   </Text>
                 </VStack>
-              </HStack>
               <HStack>
                 <TouchableOpacity
                   style={{justifyContent: 'center', alignItems: 'center'}}
@@ -252,23 +248,35 @@ const GroupItemDetails = (props: any) => {
                   </HStack>
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={styles.graphIconBg}
-                  onPress={() => {
-                    setState((prev) => {
-                      return {
-                        ...prev,
-                        isAllInOneGraphOpen: !state.isAllInOneGraphOpen,
-                      };
-                    });
-                  }}
-                >
-                  <Image
-                    style={styles.graphIcon}
-                    source={IMAGES.GraphIcon}
-                    resizeMode="contain"
-                  />
-                </TouchableOpacity>
+                {state.allGraphReportData?.length ? (
+                  <TouchableOpacity
+                    disabled={state.isFarmReport}
+                    style={[
+                      styles.graphIconBg,
+                      {
+                        backgroundColor: !state.isFarmReport
+                          ? COLORS.brown_400
+                          : COLORS.brown_300,
+                      },
+                    ]}
+                    onPress={() => {
+                      setState((prev) => {
+                        return {
+                          ...prev,
+                          isAllInOneGraphOpen: !state.isAllInOneGraphOpen,
+                        };
+                      });
+                    }}
+                  >
+                    <Image
+                      style={styles.graphIcon}
+                      source={state.isAllInOneGraphOpen ? IMAGES.GraphIcon : IMAGES.GraphVerticalIcon}
+                      resizeMode="contain"
+                    />
+                  </TouchableOpacity>
+                ) : (
+                  <></>
+                )}
               </HStack>
             </HStack>
 
@@ -338,30 +346,30 @@ const GroupItemDetails = (props: any) => {
                   </View>
                 </View>
               )
-            ) : state.isFarmReport ? 
-            <View
-                justifyContent={'center'}
-                height={323}
-                width={355}
-                backgroundColor={COLORS.white}
-                ml={2}
-                mr={2}
-                borderRadius={16}
-              >
-                <BarChart
-                  width={305}
-                  barWidth={8}
-                  barBorderRadius={4}
-                  frontColor="lightgray"
-                  data={state.allInOneReportData?.graphData}
-                  yAxisThickness={0}
-                  xAxisThickness={0}
-                  labelWidth={90}
-                  xAxisLabelTextStyle={{fontSize: 10}}
-                />
-              </View>
-            :
-            state.allGraphReportData?.length > 0 ? (
+            ) : state.isFarmReport ? (
+              <View
+                  justifyContent={'center'}
+                  height={323}
+                  width={355}
+                  backgroundColor={COLORS.white}
+                  ml={2}
+                  mr={2}
+                >
+                  {state.allInOneReportData?.graphData.map(
+                    (item: GraphSingleData) => {
+                      return (
+                        <PercentageBar
+                          height={8}
+                          backgroundColor={COLORS.brown_200}
+                          completedColor={COLORS.brown_300}
+                          labelColor={COLORS.black_300}
+                          item={item}
+                        />
+                      );
+                    }
+                  )}
+                </View>
+            ) : state.allGraphReportData?.length > 0 ? (
               <SwiperFlatList index={0}>
                 {state.allGraphReportData?.map((item: any) => {
                   return (
@@ -393,7 +401,8 @@ const GroupItemDetails = (props: any) => {
                         data={item.graphData}
                         yAxisThickness={0}
                         xAxisThickness={0}
-                        labelWidth={60}
+                        labelWidth={40}
+                        rotateLabel={true}
                         xAxisLabelTextStyle={{fontSize: 10}}
                       />
                     </View>
@@ -441,7 +450,7 @@ const GroupItemDetails = (props: any) => {
                   <ActivityIndicator size="large" color={COLORS.brown_500} />
                 </View>
               ) : state.reportByFarmList?.length > 0 ? (
-                <View height={380}>
+                <View height={380} mt={1}>
                   <FlatList
                     data={state.reportByFarmList}
                     renderItem={({item, index}) => {

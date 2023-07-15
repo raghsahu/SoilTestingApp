@@ -29,6 +29,7 @@ import {Codes, Parity, UsbSerialManager} from '../usbSerialModule';
 import {
   ATCommandInterface,
   GraphBarDataInterface,
+  GraphSingleData,
   USBDeviceInterface,
 } from '../utils/Interfaces';
 import {ALL_AT_COMMANDS, XAxisAllLabel, deviceName} from '../utils/Ble_UART_At_Command';
@@ -40,6 +41,7 @@ import {
   updateFarmData,
 } from '../database/SoilAppDB';
 import ReportByFarmItemList from '../components/ReportByFarmItems';
+import PercentageBar from '../components/PercentageBar';
 
 const manager = new BleManager();
 
@@ -382,9 +384,6 @@ const AddNewReport = (props: any) => {
         <Statusbar />
         <VStack marginTop={10}>
           <Header
-            onSettings={() => {
-              //props.navigation.navigate('Login');
-            }}
             onHeaderLabelClick={() => {
               checkBleSerial();
             }}
@@ -481,27 +480,28 @@ const AddNewReport = (props: any) => {
                 <ActivityIndicator size="large" color={COLORS.brown_500} />
               </View>
             ) : state.allInOneReportData?.graphData ? (
-              <View
-                justifyContent={'center'}
-                height={323}
-                width={355}
-                backgroundColor={COLORS.white}
-                ml={2}
-                mr={2}
-                borderRadius={16}
-              >
-                <BarChart
-                  width={305}
-                  barWidth={8}
-                  barBorderRadius={4}
-                  frontColor="lightgray"
-                  data={state.allInOneReportData?.graphData}
-                  yAxisThickness={0}
-                  xAxisThickness={0}
-                  labelWidth={90}
-                  xAxisLabelTextStyle={{fontSize: 10}}
-                />
-              </View>
+                <View
+                  justifyContent={'center'}
+                  height={323}
+                  width={355}
+                  backgroundColor={COLORS.white}
+                  ml={2}
+                  mr={2}
+                >
+                  {state.allInOneReportData?.graphData.map(
+                    (item: GraphSingleData) => {
+                      return (
+                        <PercentageBar
+                          height={8}
+                          backgroundColor={COLORS.brown_200}
+                          completedColor={COLORS.brown_300}
+                          labelColor={COLORS.black_300}
+                          item={item}
+                        />
+                      );
+                    }
+                  )}
+                </View>
             ) : (
               <View
                 justifyContent={'center'}

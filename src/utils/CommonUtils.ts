@@ -14,7 +14,7 @@ export const AsyncKey ={
 export const showToast = (message: string)=> {
     Toast.show({
         title: message,
-        placement: 'bottom'
+        placement: 'top'
       })
 }
 
@@ -61,7 +61,7 @@ export const dateFormatToDDMMYYYY = (date: string)=> {
 }
 
 export const getTime = (date: string)=> {
-  const newFormatDate = moment(date).format('hh a');
+  const newFormatDate = moment(date).format('hh:mm a');
   return newFormatDate;
 }
 
@@ -161,3 +161,11 @@ export const getPercentageValue = (value: number, total: number) => {
   }
   return parsedValue;
 }
+
+export const getDecimalNumber = (value: string) => {
+  const number = parseFloat(value);
+  const isDecimal = Number.isInteger(number) === false;
+  const formattedNumber = isDecimal ? number.toFixed(2) : number.toString();
+
+  return formattedNumber;
+};
