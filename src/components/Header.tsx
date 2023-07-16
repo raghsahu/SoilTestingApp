@@ -40,7 +40,7 @@ const Header = (props: HeaderInterface) => {
             fontStyle={'normal'}
             marginTop={20}
             fontWeight={500}
-            fontSize={16}
+            fontSize={18}
             color={COLORS.black_300}
             alignSelf={'center'}
             textAlign={'center'}>

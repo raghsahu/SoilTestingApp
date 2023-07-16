@@ -51,31 +51,36 @@ export const AllCommandMaxValueRes = {
   temp: {
     key: 'Temp',
     maxValue: 60,
+    minValue: 0,
   },
   mois: {
     key: 'Humidity',
     maxValue: 100,
+    minValue: 0,
   },
   ph: {
     key: 'PH',
     maxValue: 14,
+    minValue: 3.5,
   },
   nitrogen: {
     key: 'N',
     maxValue: 200,
+    minValue: 0,
   },
   cond: {
     key: 'EC',
     maxValue: 20,
+    minValue: 0,
   },
   phosphorus: {
     key: 'P',
     maxValue: 100,
+    minValue: 0,
   },
   potassium: {
     key: 'K',
     maxValue: 200,
+    minValue: 0,
   },
 };
-
-export const XAxisAllLabel = ['Temp', 'EC', 'PH', 'N', 'K', 'P', 'Humidity'];

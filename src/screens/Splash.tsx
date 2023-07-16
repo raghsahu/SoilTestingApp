@@ -5,24 +5,24 @@ import {COLORS, IMAGES} from '../assets';
 
 //PACKAGES
 import {CommonActions} from '@react-navigation/native';
-import { ImageBackground, StyleSheet,  View} from 'react-native';
-import { VStack, Text, Image } from 'native-base';
+import {ImageBackground, StyleSheet, View} from 'react-native';
+import {VStack, Text, Image} from 'native-base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { UserInterface } from '../utils/Interfaces';
+import {UserInterface} from '../utils/Interfaces';
 import database from '@react-native-firebase/database';
-import { firebase } from '@react-native-firebase/auth';
-import { AsyncKey } from '../utils/CommonUtils';
+import {firebase} from '@react-native-firebase/auth';
+import {AsyncKey} from '../utils/CommonUtils';
 
 const Splash = (props: any) => {
   const usersRef = database().ref('users');
 
-  useEffect(()=> {
+  useEffect(() => {
     checkUserAuth();
-  }, [])
+  }, []);
 
-  const checkUserAuth = async ()=> {
-  // Listen for authentication state changes
-  firebase.auth().onAuthStateChanged(async (user) => {
+  const checkUserAuth = async () => {
+    // Listen for authentication state changes
+    firebase.auth().onAuthStateChanged(async (user) => {
       if (user) {
         // User is authenticated
         const userAuthData = {
@@ -37,13 +37,20 @@ const Splash = (props: any) => {
         const userId = user?.uid;
         const userRef = usersRef.child(userId);
         // Fetch the data for the user node
-        userRef.once('value')
+        userRef
+          .once('value')
           .then(async (snapshot) => {
             const userData = snapshot.val();
             if (userData) {
-              await AsyncStorage.setItem(AsyncKey.user, JSON.stringify(userData));
+              await AsyncStorage.setItem(
+                AsyncKey.user,
+                JSON.stringify(userData)
+              );
             } else {
-              await AsyncStorage.setItem(AsyncKey.user, JSON.stringify(userAuthData));
+              await AsyncStorage.setItem(
+                AsyncKey.user,
+                JSON.stringify(userAuthData)
+              );
             }
             moveToNext('Home');
           })
@@ -55,8 +62,8 @@ const Splash = (props: any) => {
         console.log('User is not authenticated');
         moveToNext('Login');
       }
-    })
-  }
+    });
+  };
 
   const moveToNext = (screenName: string) => {
     setTimeout(() => {
@@ -64,7 +71,7 @@ const Splash = (props: any) => {
         CommonActions.reset({
           index: 0,
           routes: [{name: screenName}],
-        }),
+        })
       );
     }, 2000);
   };
@@ -79,18 +86,30 @@ const Splash = (props: any) => {
         }}
       >
         <VStack flex={1} justifyContent={'center'} alignContent={'center'}>
-          <Image
-          size={32}
-            source={IMAGES.SplashLogo}
-            alignSelf={'center'}
-          />
-        <Text fontFamily={'Poppins-Regular'} fontWeight={600} fontSize={36} color={'white'} textAlign={'center'}>Quick Test</Text>
-        <Text fontFamily={'Poppins-Regular'} fontWeight={600} fontSize={20} color={'white'} textAlign={'center'}>Test soil in a seconds</Text>
+          <Image size={32} source={IMAGES.SplashLogo} alignSelf={'center'} />
+          <Text
+            fontFamily={'Poppins-Regular'}
+            fontWeight={600}
+            fontSize={36}
+            color={'white'}
+            textAlign={'center'}
+          >
+            Quick Test
+          </Text>
+          <Text
+            fontFamily={'Poppins-Regular'}
+            fontWeight={600}
+            fontSize={20}
+            color={'white'}
+            textAlign={'center'}
+          >
+            Test soil in a seconds
+          </Text>
         </VStack>
       </ImageBackground>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {

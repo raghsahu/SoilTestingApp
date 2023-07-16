@@ -32,7 +32,7 @@ import {
   GraphSingleData,
   USBDeviceInterface,
 } from '../utils/Interfaces';
-import {ALL_AT_COMMANDS, XAxisAllLabel, deviceName} from '../utils/Ble_UART_At_Command';
+import {ALL_AT_COMMANDS, deviceName} from '../utils/Ble_UART_At_Command';
 import {CreateFarmsItems, ReportByFarmItems} from '../database/Interfaces';
 import {
   fetchSamplesCountByFarm,
@@ -483,10 +483,8 @@ const AddNewReport = (props: any) => {
                 <View
                   justifyContent={'center'}
                   height={323}
-                  width={355}
+                  width={370}
                   backgroundColor={COLORS.white}
-                  ml={2}
-                  mr={2}
                 >
                   {state.allInOneReportData?.graphData.map(
                     (item: GraphSingleData) => {

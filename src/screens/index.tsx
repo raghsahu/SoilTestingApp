@@ -6,6 +6,7 @@ import Profile from './Profile'
 import EditProfile from './EditProfile'
 import GroupItemDetails from './GroupItemDetails'
 import AddNewReport from './AddNewReport'
+import Settings from './Settings'
 
 export {
     Splash,
@@ -16,4 +17,5 @@ export {
     EditProfile,
     GroupItemDetails,
     AddNewReport,
+    Settings,
 };

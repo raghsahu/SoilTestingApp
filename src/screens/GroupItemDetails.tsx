@@ -165,6 +165,8 @@ const GroupItemDetails = (props: any) => {
       });
     }
   };
+  const { width } = Dimensions.get('window');
+  const slideWidth = width - 50;
 
   return (
     <>
@@ -293,10 +295,8 @@ const GroupItemDetails = (props: any) => {
                 <View
                   justifyContent={'center'}
                   height={323}
-                  width={355}
+                  width={370}
                   backgroundColor={COLORS.white}
-                  ml={2}
-                  mr={2}
                 >
                   {state.allInOneReportData?.graphData.map(
                     (item: GraphSingleData) => {
@@ -350,10 +350,8 @@ const GroupItemDetails = (props: any) => {
               <View
                   justifyContent={'center'}
                   height={323}
-                  width={355}
+                  width={370}
                   backgroundColor={COLORS.white}
-                  ml={2}
-                  mr={2}
                 >
                   {state.allInOneReportData?.graphData.map(
                     (item: GraphSingleData) => {
@@ -370,31 +368,31 @@ const GroupItemDetails = (props: any) => {
                   )}
                 </View>
             ) : state.allGraphReportData?.length > 0 ? (
-              <SwiperFlatList index={0}>
-                {state.allGraphReportData?.map((item: any) => {
-                  return (
+              <View height={323} mt={2}>
+              <SwiperFlatList
+                data={state.allGraphReportData}
+                renderItem={({item}) => (
+                  <View style={styles.slide}>
                     <View
-                      //flex={1}
-                      justifyContent={'center'}
+                      style={[styles.childContainer, {width: slideWidth}]}
                       height={323}
-                      width={355}
-                      backgroundColor={COLORS.white}
-                      ml={2}
-                      mr={2}
+                      backgroundColor={
+                        state.isFarmReport ? COLORS.white : COLORS.brown_400
+                      }
                       borderRadius={16}
                     >
                       <Text
                         mb={2}
+                        mt={2}
                         fontSize={16}
                         fontWeight={500}
                         fontFamily={'Poppins-Regular'}
-                        color={COLORS.black}
+                        color={state.isFarmReport ? COLORS.black : COLORS.white}
                         style={{marginLeft: 5, paddingLeft: 5}}
                       >
                         {item.graphHeader}
                       </Text>
                       <BarChart
-                        width={305}
                         barWidth={8}
                         barBorderRadius={4}
                         frontColor="lightgray"
@@ -402,13 +400,27 @@ const GroupItemDetails = (props: any) => {
                         yAxisThickness={0}
                         xAxisThickness={0}
                         labelWidth={40}
+                        width={305}
                         rotateLabel={true}
-                        xAxisLabelTextStyle={{fontSize: 10}}
+                        xAxisLabelTextStyle={{
+                          fontSize: 9,
+                          color: state.isFarmReport
+                            ? COLORS.black
+                            : COLORS.white,
+                        }}
+                        yAxisTextStyle={{
+                          color: state.isFarmReport
+                            ? COLORS.black
+                            : COLORS.white,
+                        }}
                       />
                     </View>
-                  );
-                })}
-              </SwiperFlatList>
+                  </View>
+                )}
+                keyExtractor={(item, index) => index.toString()}
+                horizontal
+              />
+            </View>
             ) : (
               <View
                 justifyContent={'center'}
@@ -569,10 +581,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  pagerView: {
+  slide: {
     flex: 1,
-    height: 350,
-    // justifyContent: 'center'
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  childContainer: {
+    marginRight: 5,
+    marginLeft: 5,
+    flex: 1,
   },
 });
 

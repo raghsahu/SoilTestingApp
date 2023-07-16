@@ -1,277 +1,328 @@
-import { COLORS } from "../assets";
-import { ReportByFarmItems } from "../database/Interfaces";
-import { AllCommandMaxValueRes } from "./Ble_UART_At_Command";
-import { getTime } from "./CommonUtils";
-import { GraphBarDataInterface, GraphGroupDataInterface, GraphSingleData } from "./Interfaces";
+import {ReportByFarmItems} from '../database/Interfaces';
+import {AllCommandMaxValueRes} from './Ble_UART_At_Command';
+import {getTime} from './CommonUtils';
+import {
+  GraphBarDataInterface,
+  GraphGroupDataInterface,
+  GraphSingleData,
+} from './Interfaces';
 
-//sample data
-export const barData = [
-    {value: 250, label: 'M', frontColor: COLORS.brown_300},
-    {value: 500, label: 'T', frontColor: COLORS.brown_500},
-    {value: 745, label: 'W', frontColor: COLORS.brown_300},
-    {value: 320, label: 'T', frontColor: COLORS.brown_300},
-    {value: 600, label: 'F', frontColor: COLORS.brown_500},
-    {value: 256, label: 'S', frontColor: COLORS.brown_300},
-    {value: 300, label: 'S', frontColor: COLORS.brown_300},
+export const settingsData = [
+  {
+    key: AllCommandMaxValueRes.temp.key,
+    label: 'Temperature',
+    unit: '°C',
+    min: AllCommandMaxValueRes.temp.minValue,
+    max: AllCommandMaxValueRes.temp.maxValue,
+  },
+  {
+    key: AllCommandMaxValueRes.mois.key,
+    label: 'Humidity',
+    unit: '%RH',
+    min: AllCommandMaxValueRes.mois.minValue,
+    max: AllCommandMaxValueRes.mois.maxValue,
+  },
+  {
+    key: AllCommandMaxValueRes.cond.key,
+    label: 'EC',
+    unit: 'ds/m',
+    min: AllCommandMaxValueRes.cond.minValue,
+    max: AllCommandMaxValueRes.cond.maxValue,
+  },
+  {
+    key: AllCommandMaxValueRes.ph.key,
+    label: 'pH',
+    unit: 'pH',
+    min: AllCommandMaxValueRes.ph.minValue,
+    max: AllCommandMaxValueRes.ph.maxValue,
+  },
+  {
+    key: AllCommandMaxValueRes.nitrogen.key,
+    label: 'Nitrogen',
+    unit: 'mg/kg',
+    min: AllCommandMaxValueRes.nitrogen.minValue,
+    max: AllCommandMaxValueRes.nitrogen.maxValue,
+  },
+  {
+    key: AllCommandMaxValueRes.phosphorus.key,
+    label: 'Phosphorus',
+    unit: 'mg/kg',
+    min: AllCommandMaxValueRes.phosphorus.minValue,
+    max: AllCommandMaxValueRes.phosphorus.maxValue,
+  },
+  {
+    key: AllCommandMaxValueRes.potassium.key,
+    label: 'Potassium',
+    unit: 'mg/kg',
+    min: AllCommandMaxValueRes.potassium.minValue,
+    max: AllCommandMaxValueRes.potassium.maxValue,
+  },
 ];
 
-export const getGraphReportData = async (allReportRes: ReportByFarmItems[])=> {
-    const graphBarData= {
-        allInOneGraph: {} as GraphBarDataInterface,
-        allSeparateGraph: [] as GraphBarDataInterface[],
-    } as GraphGroupDataInterface
+export const getGraphReportData = async (allReportRes: ReportByFarmItems[]) => {
+  const graphBarData = {
+    allInOneGraph: {} as GraphBarDataInterface,
+    allSeparateGraph: [] as GraphBarDataInterface[],
+  } as GraphGroupDataInterface;
 
-   const tempGraphData = {
+  const tempGraphData = {
     graphHeader: 'Temperature Report',
     key: AllCommandMaxValueRes.temp.key,
     graphData: [] as GraphSingleData[],
-   }
-   const phGraphData = {
+  };
+  const phGraphData = {
     graphHeader: 'PH Report',
     key: AllCommandMaxValueRes.ph.key,
     graphData: [] as GraphSingleData[],
-   }
-   //cond report
-   const ecGraphData = {
+  };
+  //cond report
+  const ecGraphData = {
     graphHeader: 'EC Report',
     key: AllCommandMaxValueRes.cond.key,
     graphData: [] as GraphSingleData[],
-   }
-   const nGraphData = {
+  };
+  const nGraphData = {
     graphHeader: 'N Report',
     key: AllCommandMaxValueRes.nitrogen.key,
     graphData: [] as GraphSingleData[],
-   }
-   //phosphorus
-   const pGraphData = {
+  };
+  //phosphorus
+  const pGraphData = {
     graphHeader: 'P Report',
     key: AllCommandMaxValueRes.phosphorus.key,
     graphData: [] as GraphSingleData[],
-   }
-   //POTASSIUM
-   const kGraphData = {
+  };
+  //POTASSIUM
+  const kGraphData = {
     graphHeader: 'K Report',
     key: AllCommandMaxValueRes.potassium.key,
     graphData: [] as GraphSingleData[],
-   }
-   //MOIS
-   const humidityGraphData = {
+  };
+  //MOIS
+  const humidityGraphData = {
     graphHeader: 'Humidity Report',
     key: AllCommandMaxValueRes.mois.key,
     graphData: [] as GraphSingleData[],
-   }
+  };
 
-    allReportRes.map((item: ReportByFarmItems) => {
-        if (item.temp) {
-            const tempData = {
-                value: parseInt(item.temp),
-                label: getTime(item.create_time.toString()),
-            }
-            tempGraphData.graphData.push(tempData)
-        } if (item.cond) {
-            const tempData = {
-                value: parseInt(item.cond),
-                label: getTime(item.create_time.toString()),
-            }
-            ecGraphData.graphData.push(tempData)
-        }
-         if (item.ph) {
-            const tempData = {
-                value: parseInt(item.ph),
-                label: getTime(item.create_time.toString()),
-            }
-            phGraphData.graphData.push(tempData)
-        }
-         if (item.nitrogen) {
-            const tempData = {
-                value: parseInt(item.nitrogen),
-                label: getTime(item.create_time.toString()),
-            }
-            nGraphData.graphData.push(tempData)
-        }
-         if (item.phosphorus) {
-            const tempData = {
-                value: parseInt(item.phosphorus),
-                label: getTime(item.create_time.toString()),
-            }
-            pGraphData.graphData.push(tempData)
-        }
-         if (item.potassium) {
-            const tempData = {
-                value: parseInt(item.potassium),
-                label: getTime(item.create_time.toString()),
-            }
-            kGraphData.graphData.push(tempData)
-        }
-         if (item.mois) {
-            const tempData = {
-                value: parseInt(item.mois),
-                label: getTime(item.create_time.toString()),
-            }
-            humidityGraphData.graphData.push(tempData)
-        }
-    });
+  allReportRes.map((item: ReportByFarmItems) => {
+    if (item.temp) {
+      const tempData = {
+        value: parseInt(item.temp),
+        label: getTime(item.create_time.toString()),
+      };
+      tempGraphData.graphData.push(tempData);
+    }
+    if (item.cond) {
+      const tempData = {
+        value: parseInt(item.cond),
+        label: getTime(item.create_time.toString()),
+      };
+      ecGraphData.graphData.push(tempData);
+    }
+    if (item.ph) {
+      const tempData = {
+        value: parseInt(item.ph),
+        label: getTime(item.create_time.toString()),
+      };
+      phGraphData.graphData.push(tempData);
+    }
+    if (item.nitrogen) {
+      const tempData = {
+        value: parseInt(item.nitrogen),
+        label: getTime(item.create_time.toString()),
+      };
+      nGraphData.graphData.push(tempData);
+    }
+    if (item.phosphorus) {
+      const tempData = {
+        value: parseInt(item.phosphorus),
+        label: getTime(item.create_time.toString()),
+      };
+      pGraphData.graphData.push(tempData);
+    }
+    if (item.potassium) {
+      const tempData = {
+        value: parseInt(item.potassium),
+        label: getTime(item.create_time.toString()),
+      };
+      kGraphData.graphData.push(tempData);
+    }
+    if (item.mois) {
+      const tempData = {
+        value: parseInt(item.mois),
+        label: getTime(item.create_time.toString()),
+      };
+      humidityGraphData.graphData.push(tempData);
+    }
+  });
 
-    graphBarData.allSeparateGraph.push(tempGraphData)
-    graphBarData.allSeparateGraph.push(ecGraphData)
-    graphBarData.allSeparateGraph.push(phGraphData)
-    graphBarData.allSeparateGraph.push(nGraphData)
-    graphBarData.allSeparateGraph.push(kGraphData)
-    graphBarData.allSeparateGraph.push(pGraphData)
-    graphBarData.allSeparateGraph.push(humidityGraphData)
+  graphBarData.allSeparateGraph.push(tempGraphData);
+  graphBarData.allSeparateGraph.push(ecGraphData);
+  graphBarData.allSeparateGraph.push(phGraphData);
+  graphBarData.allSeparateGraph.push(nGraphData);
+  graphBarData.allSeparateGraph.push(kGraphData);
+  graphBarData.allSeparateGraph.push(pGraphData);
+  graphBarData.allSeparateGraph.push(humidityGraphData);
 
-    const allInOneGraph = await convertAllInOneGraphData(graphBarData.allSeparateGraph);
-    graphBarData.allInOneGraph = allInOneGraph;
+  const allInOneGraph = await convertAllInOneGraphData(
+    graphBarData.allSeparateGraph
+  );
+  graphBarData.allInOneGraph = allInOneGraph;
 
-    return graphBarData;
-}
+  return graphBarData;
+};
 
-export const convertAllInOneGraphData = (graphAllBarData: GraphBarDataInterface[])=> {
-    const averageGraphData = {
-     graphHeader: '',
-     key: '',
-     graphData: [] as GraphSingleData[],
-    } as GraphBarDataInterface;
+export const convertAllInOneGraphData = (
+  graphAllBarData: GraphBarDataInterface[]
+) => {
+  const averageGraphData = {
+    graphHeader: '',
+    key: '',
+    graphData: [] as GraphSingleData[],
+  } as GraphBarDataInterface;
 
-    graphAllBarData.map((item: any)=> {
-          if (item.key ===AllCommandMaxValueRes.temp.key) {
-            const sum = item.graphData.reduce(function(prev: any, current: any) {
-                return prev  +current.value
-              }, 0);
-            const tempData = {
-                value: sum/item.graphData?.length || 0,
-                label: item.key,
-                maxValue: AllCommandMaxValueRes.temp.maxValue,
-            }
-            averageGraphData.graphData.push(tempData)
-        } if (item.key === AllCommandMaxValueRes.cond.key) {
-            const sum = item.graphData.reduce(function(prev: any, current: any) {
-                return prev  +current.value
-              }, 0);
-            const tempData = {
-                value: sum/item.graphData?.length || 0,
-                label: item.key,
-                maxValue: AllCommandMaxValueRes.cond.maxValue,
-            }
-            averageGraphData.graphData.push(tempData)
-        }
-         if (item.key === AllCommandMaxValueRes.ph.key) {
-            const sum = item.graphData.reduce(function(prev: any, current: any) {
-                return prev  +current.value
-              }, 0);
-            const tempData = {
-                value: sum/item.graphData?.length || 0,
-                label: item.key,
-                maxValue: AllCommandMaxValueRes.ph.maxValue,
-            }
-            averageGraphData.graphData.push(tempData)
-        }
-         if (item.key === AllCommandMaxValueRes.nitrogen.key) {
-            const sum = item.graphData.reduce(function(prev: any, current: any) {
-                return prev  +current.value
-              }, 0);
-            const tempData = {
-                value: sum/item.graphData?.length || 0,
-                label: item.key,
-                maxValue: AllCommandMaxValueRes.nitrogen.maxValue,
-            }
-            averageGraphData.graphData.push(tempData)
-        }
-         if (item.key === AllCommandMaxValueRes.phosphorus.key) {
-            const sum = item.graphData.reduce(function(prev: any, current: any) {
-                return prev  +current.value
-              }, 0);
-            const tempData = {
-                value: sum/item.graphData?.length || 0,
-                label: item.key,
-                maxValue: AllCommandMaxValueRes.potassium.maxValue,
-            }
-            averageGraphData.graphData.push(tempData)
-        }
-         if (item.key === AllCommandMaxValueRes.potassium.key) {
-            const sum = item.graphData.reduce(function(prev: any, current: any) {
-                return prev  +current.value
-              }, 0);
-            const tempData = {
-                value: sum/item.graphData?.length || 0,
-                label: item.key,
-                maxValue: AllCommandMaxValueRes.potassium.maxValue,
-            }
-            averageGraphData.graphData.push(tempData)
-        }
-         if (item.key === AllCommandMaxValueRes.mois.key) {
-            const sum = item.graphData.reduce(function(prev: any, current: any) {
-                return prev  +current.value
-              }, 0);
-            const tempData = {
-                value: sum/item.graphData?.length || 0,
-                label: item.key,
-                maxValue: AllCommandMaxValueRes.mois.maxValue,
-            }
-            averageGraphData.graphData.push(tempData)
-        }
-    })
-    return averageGraphData;
-}
+  graphAllBarData.map((item: any) => {
+    if (item.key === AllCommandMaxValueRes.temp.key) {
+      const sum = item.graphData.reduce(function (prev: any, current: any) {
+        return prev + current.value;
+      }, 0);
+      const tempData = {
+        value: sum / item.graphData?.length || 0,
+        label: item.key,
+        maxValue: AllCommandMaxValueRes.temp.maxValue,
+      };
+      averageGraphData.graphData.push(tempData);
+    }
+    if (item.key === AllCommandMaxValueRes.cond.key) {
+      const sum = item.graphData.reduce(function (prev: any, current: any) {
+        return prev + current.value;
+      }, 0);
+      const tempData = {
+        value: sum / item.graphData?.length || 0,
+        label: item.key,
+        maxValue: AllCommandMaxValueRes.cond.maxValue,
+      };
+      averageGraphData.graphData.push(tempData);
+    }
+    if (item.key === AllCommandMaxValueRes.ph.key) {
+      const sum = item.graphData.reduce(function (prev: any, current: any) {
+        return prev + current.value;
+      }, 0);
+      const tempData = {
+        value: sum / item.graphData?.length || 0,
+        label: item.key,
+        maxValue: AllCommandMaxValueRes.ph.maxValue,
+      };
+      averageGraphData.graphData.push(tempData);
+    }
+    if (item.key === AllCommandMaxValueRes.nitrogen.key) {
+      const sum = item.graphData.reduce(function (prev: any, current: any) {
+        return prev + current.value;
+      }, 0);
+      const tempData = {
+        value: sum / item.graphData?.length || 0,
+        label: item.key,
+        maxValue: AllCommandMaxValueRes.nitrogen.maxValue,
+      };
+      averageGraphData.graphData.push(tempData);
+    }
+    if (item.key === AllCommandMaxValueRes.phosphorus.key) {
+      const sum = item.graphData.reduce(function (prev: any, current: any) {
+        return prev + current.value;
+      }, 0);
+      const tempData = {
+        value: sum / item.graphData?.length || 0,
+        label: item.key,
+        maxValue: AllCommandMaxValueRes.potassium.maxValue,
+      };
+      averageGraphData.graphData.push(tempData);
+    }
+    if (item.key === AllCommandMaxValueRes.potassium.key) {
+      const sum = item.graphData.reduce(function (prev: any, current: any) {
+        return prev + current.value;
+      }, 0);
+      const tempData = {
+        value: sum / item.graphData?.length || 0,
+        label: item.key,
+        maxValue: AllCommandMaxValueRes.potassium.maxValue,
+      };
+      averageGraphData.graphData.push(tempData);
+    }
+    if (item.key === AllCommandMaxValueRes.mois.key) {
+      const sum = item.graphData.reduce(function (prev: any, current: any) {
+        return prev + current.value;
+      }, 0);
+      const tempData = {
+        value: sum / item.graphData?.length || 0,
+        label: item.key,
+        maxValue: AllCommandMaxValueRes.mois.maxValue,
+      };
+      averageGraphData.graphData.push(tempData);
+    }
+  });
+  return averageGraphData;
+};
 
 export const getSelectedGraphReportData = (item: ReportByFarmItems) => {
-    const graphBarData= [] as GraphBarDataInterface[];
+  const graphBarData = [] as GraphBarDataInterface[];
 
-    const selectedGraphData = {
-     graphHeader: `${item.farm_name} Report`,
-     key: '',
-     graphData: [] as GraphSingleData[]
-    } as GraphBarDataInterface;
+  const selectedGraphData = {
+    graphHeader: `${item.farm_name} Report`,
+    key: '',
+    graphData: [] as GraphSingleData[],
+  } as GraphBarDataInterface;
 
-    if (item.temp) {
-        const tempData = {
-            value: parseInt(item.temp),
-            label: 'Temp'
-        }
-        selectedGraphData.graphData.push(tempData)
-    } if (item.cond) {
-        const tempData = {
-            value: parseInt(item.cond),
-            label: 'EC'
-        }
-        selectedGraphData.graphData.push(tempData)
-    }
-     if (item.ph) {
-        const tempData = {
-            value: parseInt(item.ph),
-            label: 'PH'
-        }
-        selectedGraphData.graphData.push(tempData)
-    }
-     if (item.nitrogen) {
-        const tempData = {
-            value: parseInt(item.nitrogen),
-            label: 'N'
-        }
-        selectedGraphData.graphData.push(tempData)
-    }
-     if (item.phosphorus) {
-        const tempData = {
-            value: parseInt(item.phosphorus),
-            label: 'P'
-        }
-        selectedGraphData.graphData.push(tempData)
-    }
-     if (item.potassium) {
-        const tempData = {
-            value: parseInt(item.potassium),
-            label: 'K'
-        }
-        selectedGraphData.graphData.push(tempData)
-    }
-     if (item.mois) {
-        const tempData = {
-            value: parseInt(item.mois),
-            label: 'H'
-        }
-        selectedGraphData.graphData.push(tempData)
-    }
+  if (item.temp) {
+    const tempData = {
+      value: parseInt(item.temp),
+      label: 'Temp',
+    };
+    selectedGraphData.graphData.push(tempData);
+  }
+  if (item.cond) {
+    const tempData = {
+      value: parseInt(item.cond),
+      label: 'EC',
+    };
+    selectedGraphData.graphData.push(tempData);
+  }
+  if (item.ph) {
+    const tempData = {
+      value: parseInt(item.ph),
+      label: 'PH',
+    };
+    selectedGraphData.graphData.push(tempData);
+  }
+  if (item.nitrogen) {
+    const tempData = {
+      value: parseInt(item.nitrogen),
+      label: 'N',
+    };
+    selectedGraphData.graphData.push(tempData);
+  }
+  if (item.phosphorus) {
+    const tempData = {
+      value: parseInt(item.phosphorus),
+      label: 'P',
+    };
+    selectedGraphData.graphData.push(tempData);
+  }
+  if (item.potassium) {
+    const tempData = {
+      value: parseInt(item.potassium),
+      label: 'K',
+    };
+    selectedGraphData.graphData.push(tempData);
+  }
+  if (item.mois) {
+    const tempData = {
+      value: parseInt(item.mois),
+      label: 'H',
+    };
+    selectedGraphData.graphData.push(tempData);
+  }
 
-    graphBarData.push(selectedGraphData)
-    return graphBarData;
-}
+  graphBarData.push(selectedGraphData);
+  return graphBarData;
+};

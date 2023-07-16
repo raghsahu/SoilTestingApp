@@ -11,6 +11,7 @@ import {
   EditProfile,
   GroupItemDetails,
   AddNewReport,
+  Settings,
 } from './src/screens';
 import { NativeBaseProvider } from 'native-base';
 const {Navigator, Screen} = createStackNavigator();
@@ -38,6 +39,7 @@ const App = () => {
           <Screen name="EditProfile" component={EditProfile} />
           <Screen name="GroupItemDetails" component={GroupItemDetails} />
           <Screen name="AddNewReport" component={AddNewReport} />
+          <Screen name="Settings" component={Settings} />
         </Navigator>
       </NavigationContainer>
     </NativeBaseProvider>

@@ -9,7 +9,12 @@ const PercentageBar = (props: any) => {
   return (
     <View m={2}>
       <HStack>
-        <Text flex={1} fontSize={12} fontWeight={500} color={labelColor || COLORS.white}>
+        <Text
+          flex={1}
+          fontSize={12}
+          fontWeight={500}
+          color={labelColor || COLORS.white}
+        >
           {item.label} {' - '}
           {/* {getPercentageValue(item.value, item.maxValue)} */}
           {getDecimalNumber(item.value)}

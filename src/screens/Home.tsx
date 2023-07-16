@@ -49,10 +49,7 @@ import {
   updateFarmData,
   updateGroupData,
 } from '../database/SoilAppDB';
-import {
-  CreateFarmsItems,
-  CreateGroupItems,
-} from '../database/Interfaces';
+import {CreateFarmsItems, CreateGroupItems} from '../database/Interfaces';
 import {useFocusEffect} from '@react-navigation/native';
 import {
   GraphBarDataInterface,
@@ -62,11 +59,11 @@ import {
 } from '../utils/Interfaces';
 import {UsbSerialManager} from '../usbSerialModule';
 import StartEndDatePicker from '../components/StartEndDatePicker';
-import {SwiperFlatList} from 'react-native-swiper-flatlist';
 import PercentageBar from '../components/PercentageBar';
 import {BleManager, Device} from 'react-native-ble-plx';
 import {deviceName} from '../utils/Ble_UART_At_Command';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import SwiperFlatList from 'react-native-swiper-flatlist';
 
 const manager = new BleManager();
 const Home = (props: any) => {
@@ -294,8 +291,8 @@ const Home = (props: any) => {
       });
       getAllReportByGroup(
         state.isSelectedGroup?.group_id
-            ? state.isSelectedGroup.group_id
-            : allGroupRes[0].group_id,
+          ? state.isSelectedGroup.group_id
+          : allGroupRes[0].group_id,
         state.filterByToDate,
         state.filterByFromDate
       );
@@ -425,8 +422,10 @@ const Home = (props: any) => {
             openUpdateGroupModal: false,
           };
         });
-        getAllGroupLists();
-        getAllReportByDate(state.filterByToDate, state.filterByFromDate);
+        setTimeout(() => {
+          getAllGroupLists();
+          getAllReportByDate(state.filterByToDate, state.filterByFromDate);
+        }, 500);
       }
     } catch (err) {
       console.error('group_errr', err);
@@ -604,6 +603,8 @@ const Home = (props: any) => {
       },
     });
   };
+  const { width } = Dimensions.get('window');
+  const slideWidth = width - 50;
 
   return (
     <View style={styles.container}>
@@ -615,7 +616,7 @@ const Home = (props: any) => {
             props.navigation.navigate('Profile');
           }}
           onSettings={() => {
-            //props.navigation.navigate('Login');
+            props.navigation.navigate('Settings');
           }}
           onHeaderLabelClick={() => {
             checkBleSerial();
@@ -625,7 +626,7 @@ const Home = (props: any) => {
               ? 'Device: ' + state.connectedBleDevice?.name
               : state.connectedUsbDevice?.deviceId
               ? 'Device Id: ' + state.connectedUsbDevice?.deviceId
-              : 'No Device Connected'
+              : ''
           }
         ></Header>
         <VStack marginLeft={5} marginRight={5}>
@@ -656,7 +657,12 @@ const Home = (props: any) => {
                   justifyContent: 'center',
                 }}
               >
-                {state.isSelectedGroup.group_name + `${state.isSelectedFarmItem.farm_name ? ' - ' +  state.isSelectedFarmItem.farm_name : ''}`}
+                {state.isSelectedGroup.group_name +
+                  `${
+                    state.isSelectedFarmItem.farm_name
+                      ? ' - ' + state.isSelectedFarmItem.farm_name
+                      : ''
+                  }`}
               </Text>
             </VStack>
             {state.groupTabList?.length ? (
@@ -751,9 +757,8 @@ const Home = (props: any) => {
                   state.isFarmReport ? COLORS.white : COLORS.brown_400
                 }
                 borderRadius={16}
-                width={355}
-                ml={2}
-                mr={2}
+                width={370}
+                mt={2}
               >
                 {state.allInOneReportData.graphData?.map(
                   (item: GraphSingleData) => {
@@ -812,56 +817,59 @@ const Home = (props: any) => {
               </View>
             )
           ) : state.allGraphReportData?.length > 0 ? (
-            <SwiperFlatList index={0}>
-              {state.allGraphReportData?.map((item: any) => {
-                return (
-                  <View
-                    //justifyContent={'center'}
-                    height={330}
-                    backgroundColor={
-                      state.isFarmReport ? COLORS.white : COLORS.brown_400
-                    }
-                    mt={2}
-                    borderRadius={16}
-                    width={355}
-                    ml={2}
-                    mr={2}
-                  >
-                    <Text
-                      mb={2}
-                      mt={2}
-                      fontSize={16}
-                      fontWeight={500}
-                      fontFamily={'Poppins-Regular'}
-                      color={state.isFarmReport ? COLORS.black : COLORS.white}
-                      style={{marginLeft: 5, paddingLeft: 5}}
+            <View height={323} mt={2}>
+              <SwiperFlatList
+                data={state.allGraphReportData}
+                renderItem={({item}) => (
+                  <View style={styles.slide}>
+                    <View
+                      style={[styles.childContainer, {width: slideWidth}]}
+                      height={323}
+                      backgroundColor={
+                        state.isFarmReport ? COLORS.white : COLORS.brown_400
+                      }
+                      borderRadius={16}
                     >
-                      {item.graphHeader}
-                    </Text>
-
-                    <BarChart
-                      barWidth={8}
-                      //noOfSections={3}
-                      barBorderRadius={4}
-                      frontColor="lightgray"
-                      data={item.graphData}
-                      yAxisThickness={0}
-                      xAxisThickness={0}
-                      labelWidth={40}
-                      width={305}
-                      rotateLabel={true}
-                      xAxisLabelTextStyle={{
-                        fontSize: 10,
-                        color: state.isFarmReport ? COLORS.black : COLORS.white,
-                      }}
-                      yAxisTextStyle={{
-                        color: state.isFarmReport ? COLORS.black : COLORS.white,
-                      }}
-                    />
+                      <Text
+                        mb={2}
+                        mt={2}
+                        fontSize={16}
+                        fontWeight={500}
+                        fontFamily={'Poppins-Regular'}
+                        color={state.isFarmReport ? COLORS.black : COLORS.white}
+                        style={{marginLeft: 5, paddingLeft: 5}}
+                      >
+                        {item.graphHeader}
+                      </Text>
+                      <BarChart
+                        barWidth={8}
+                        barBorderRadius={4}
+                        frontColor="lightgray"
+                        data={item.graphData}
+                        yAxisThickness={0}
+                        xAxisThickness={0}
+                        labelWidth={40}
+                        width={305}
+                        rotateLabel={true}
+                        xAxisLabelTextStyle={{
+                          fontSize: 9,
+                          color: state.isFarmReport
+                            ? COLORS.black
+                            : COLORS.white,
+                        }}
+                        yAxisTextStyle={{
+                          color: state.isFarmReport
+                            ? COLORS.black
+                            : COLORS.white,
+                        }}
+                      />
+                    </View>
                   </View>
-                );
-              })}
-            </SwiperFlatList>
+                )}
+                keyExtractor={(item, index) => index.toString()}
+                horizontal
+              />
+            </View>
           ) : (
             <View
               justifyContent={'center'}
@@ -1073,7 +1081,7 @@ const Home = (props: any) => {
           )}
         </VStack>
 
-        {state.groupTabList?.length > 0 && (
+        {state.groupTabList?.length > 0 && state.isSelectedGroup?.group_id && (
           <View
             flex={1}
             mb={10}
@@ -1230,9 +1238,15 @@ const styles = StyleSheet.create({
     width: 14,
     alignSelf: 'center',
   },
-  pagerView: {
+  slide: {
     flex: 1,
-    height: 350,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  childContainer: {
+    marginRight: 5,
+    marginLeft: 5,
+    flex: 1,
   },
 });
 

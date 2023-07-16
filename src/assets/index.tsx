@@ -40,4 +40,5 @@ export const COLORS = {
     black_100: '#B0B0B0',
     groupListItemBg: '#E6E6E64D',
     homeNoDataBg: '#D9D9D936',
+    settingsCardBg: '#E6E6E699',
 }
