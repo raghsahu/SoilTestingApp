@@ -646,6 +646,7 @@ const Home = (props: any) => {
               >
                 {'Soil Report'}
               </Text>
+              {state.isSelectedGroup?.group_name &&
               <Text
                 fontSize={12}
                 fontWeight={500}
@@ -659,11 +660,12 @@ const Home = (props: any) => {
               >
                 {state.isSelectedGroup.group_name +
                   `${
-                    state.isSelectedFarmItem.farm_name
+                    state?.isSelectedFarmItem?.farm_name
                       ? ' - ' + state.isSelectedFarmItem.farm_name
                       : ''
                   }`}
               </Text>
+            }
             </VStack>
             {state.groupTabList?.length ? (
               <HStack>
@@ -726,6 +728,7 @@ const Home = (props: any) => {
                     }}
                   >
                     <Image
+                      key={state.isAllInOneGraphOpen ? 'graphIcon' : 'graphVerticalIcon'}
                       style={styles.graphIcon}
                       source={
                         state.isAllInOneGraphOpen

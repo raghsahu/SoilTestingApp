@@ -271,6 +271,7 @@ const GroupItemDetails = (props: any) => {
                     }}
                   >
                     <Image
+                       key={state.isAllInOneGraphOpen ? 'graphIcon' : 'graphVerticalIcon'}
                       style={styles.graphIcon}
                       source={state.isAllInOneGraphOpen ? IMAGES.GraphIcon : IMAGES.GraphVerticalIcon}
                       resizeMode="contain"
